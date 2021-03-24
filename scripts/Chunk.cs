@@ -13,5 +13,15 @@ namespace ProjectWisteria
                 Sections[i] = new ChunkSection();
             }
         }
+
+        public static int GetChunkSectionArrayIndex(int chunkSectionY)
+        {
+            return (int) ChunkNegativeSections + chunkSectionY;
+        }
+
+        public ChunkSection GetChunkSection(int chunkSectionY)
+        {
+            return Sections[GetChunkSectionArrayIndex(chunkSectionY)];
+        }
     }
 }

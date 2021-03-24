@@ -9,6 +9,10 @@ namespace ProjectWisteria
 
         public ushort BlockCount { get; set; }
 
+        public ChunkSection XpNeighbor, XnNeighbor;
+        public ChunkSection YpNeighbor, YnNeighbor;
+        public ChunkSection ZpNeighbor, ZnNeighbor;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ushort GetBlockArrayIndex(byte x, byte y, byte z)
         {
