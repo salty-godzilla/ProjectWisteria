@@ -10,8 +10,8 @@ namespace ProjectWisteria
     {
         private readonly int[] _baseBlockTriangles =
         {
-            0, 2, 1, // 0
-            0, 3, 2 // 1
+            0, 1, 2, // 0
+            0, 2, 3 // 1
         };
 
         private readonly List<Vector3> _verts = new List<Vector3>();
@@ -65,16 +65,6 @@ namespace ProjectWisteria
                             AddZnBlockFaceElems(blockX, blockY, blockZ);
                         }
                     }
-                }
-            }
-
-            for (var j = 0; j < _verts.Count; j += 4)
-            {
-                var normal = -new Plane(_verts[j], _verts[j + 1], _verts[j + 2]).Normal;
-
-                for (var k = 0; k < 4; k++)
-                {
-                    _normals.Add(normal);
                 }
             }
 
@@ -182,15 +172,20 @@ namespace ProjectWisteria
 
         private void AddXpBlockFaceElems(byte x, byte y, byte z)
         {
-            _verts.Add(new Vector3(x + 1f, y + 1f, z + 1f));
-            _verts.Add(new Vector3(x + 1f, y, z + 1f));
-            _verts.Add(new Vector3(x + 1f, y, z));
-            _verts.Add(new Vector3(x + 1f, y + 1f, z));
+            _verts.Add(new Vector3(x + 1, y + 1, z + 1));
+            _verts.Add(new Vector3(x + 1, y + 1, z));
+            _verts.Add(new Vector3(x + 1, y, z));
+            _verts.Add(new Vector3(x + 1, y, z + 1));
 
-            _uvs.Add(new Vector2(1f, 1f));
-            _uvs.Add(new Vector2(1f, 0f));
-            _uvs.Add(new Vector2(0f, 0f));
-            _uvs.Add(new Vector2(0f, 1f));
+            _normals.Add(new Vector3(1, 0, 0));
+            _normals.Add(new Vector3(1, 0, 0));
+            _normals.Add(new Vector3(1, 0, 0));
+            _normals.Add(new Vector3(1, 0, 0));
+
+            _uvs.Add(new Vector2(0, 0));
+            _uvs.Add(new Vector2(1, 0));
+            _uvs.Add(new Vector2(1, 1));
+            _uvs.Add(new Vector2(0, 1));
 
             foreach (var triangle in _baseBlockTriangles)
             {
@@ -200,15 +195,20 @@ namespace ProjectWisteria
 
         private void AddXnBlockFaceElems(byte x, byte y, byte z)
         {
-            _verts.Add(new Vector3(x, y + 1f, z));
+            _verts.Add(new Vector3(x, y + 1, z));
+            _verts.Add(new Vector3(x, y + 1, z + 1));
+            _verts.Add(new Vector3(x, y, z + 1));
             _verts.Add(new Vector3(x, y, z));
-            _verts.Add(new Vector3(x, y, z + 1f));
-            _verts.Add(new Vector3(x, y + 1f, z + 1f));
 
-            _uvs.Add(new Vector2(1f, 1f));
-            _uvs.Add(new Vector2(1f, 0f));
-            _uvs.Add(new Vector2(0f, 0f));
-            _uvs.Add(new Vector2(0f, 1f));
+            _normals.Add(new Vector3(1, 0, 0));
+            _normals.Add(new Vector3(1, 0, 0));
+            _normals.Add(new Vector3(1, 0, 0));
+            _normals.Add(new Vector3(1, 0, 0));
+
+            _uvs.Add(new Vector2(0, 0));
+            _uvs.Add(new Vector2(1, 0));
+            _uvs.Add(new Vector2(1, 1));
+            _uvs.Add(new Vector2(0, 1));
 
             foreach (var triangle in _baseBlockTriangles)
             {
@@ -218,15 +218,20 @@ namespace ProjectWisteria
 
         private void AddYpBlockFaceElems(byte x, byte y, byte z)
         {
-            _verts.Add(new Vector3(x + 1f, y + 1f, z + 1f));
-            _verts.Add(new Vector3(x + 1f, y + 1f, z));
-            _verts.Add(new Vector3(x, y + 1f, z));
-            _verts.Add(new Vector3(x, y + 1f, z + 1f));
+            _verts.Add(new Vector3(x, y + 1, z));
+            _verts.Add(new Vector3(x + 1, y + 1, z));
+            _verts.Add(new Vector3(x + 1, y + 1, z + 1));
+            _verts.Add(new Vector3(x, y + 1, z + 1));
 
-            _uvs.Add(new Vector2(1f, 1f));
-            _uvs.Add(new Vector2(1f, 0f));
-            _uvs.Add(new Vector2(0f, 0f));
-            _uvs.Add(new Vector2(0f, 1f));
+            _normals.Add(new Vector3(0, 1, 0));
+            _normals.Add(new Vector3(0, 1, 0));
+            _normals.Add(new Vector3(0, 1, 0));
+            _normals.Add(new Vector3(0, 1, 0));
+
+            _uvs.Add(new Vector2(0, 0));
+            _uvs.Add(new Vector2(1, 0));
+            _uvs.Add(new Vector2(1, 1));
+            _uvs.Add(new Vector2(0, 1));
 
             foreach (var triangle in _baseBlockTriangles)
             {
@@ -236,15 +241,20 @@ namespace ProjectWisteria
 
         private void AddYnBlockFaceElems(byte x, byte y, byte z)
         {
-            _verts.Add(new Vector3(x + 1f, y, z));
-            _verts.Add(new Vector3(x + 1f, y, z + 1f));
-            _verts.Add(new Vector3(x, y, z + 1f));
+            _verts.Add(new Vector3(x, y, z + 1));
+            _verts.Add(new Vector3(x + 1, y, z + 1));
+            _verts.Add(new Vector3(x + 1, y, z));
             _verts.Add(new Vector3(x, y, z));
 
-            _uvs.Add(new Vector2(1f, 1f));
-            _uvs.Add(new Vector2(1f, 0f));
-            _uvs.Add(new Vector2(0f, 0f));
-            _uvs.Add(new Vector2(0f, 1f));
+            _normals.Add(new Vector3(0, -1, 0));
+            _normals.Add(new Vector3(0, -1, 0));
+            _normals.Add(new Vector3(0, -1, 0));
+            _normals.Add(new Vector3(0, -1, 0));
+
+            _uvs.Add(new Vector2(0, 0));
+            _uvs.Add(new Vector2(1, 0));
+            _uvs.Add(new Vector2(1, 1));
+            _uvs.Add(new Vector2(0, 1));
 
             foreach (var triangle in _baseBlockTriangles)
             {
@@ -254,15 +264,20 @@ namespace ProjectWisteria
 
         private void AddZpBlockFaceElems(byte x, byte y, byte z)
         {
-            _verts.Add(new Vector3(x, y + 1f, z + 1f));
-            _verts.Add(new Vector3(x, y, z + 1f));
-            _verts.Add(new Vector3(x + 1f, y, z + 1f));
-            _verts.Add(new Vector3(x + 1f, y + 1f, z + 1f));
+            _verts.Add(new Vector3(x, y + 1, z + 1));
+            _verts.Add(new Vector3(x + 1, y + 1, z + 1));
+            _verts.Add(new Vector3(x + 1, y, z + 1));
+            _verts.Add(new Vector3(x, y, z + 1));
 
-            _uvs.Add(new Vector2(1f, 1f));
-            _uvs.Add(new Vector2(1f, 0f));
-            _uvs.Add(new Vector2(0f, 0f));
-            _uvs.Add(new Vector2(0f, 1f));
+            _normals.Add(new Vector3(0, 0, 1));
+            _normals.Add(new Vector3(0, 0, 1));
+            _normals.Add(new Vector3(0, 0, 1));
+            _normals.Add(new Vector3(0, 0, 1));
+
+            _uvs.Add(new Vector2(0, 0));
+            _uvs.Add(new Vector2(1, 0));
+            _uvs.Add(new Vector2(1, 1));
+            _uvs.Add(new Vector2(0, 1));
 
             foreach (var triangle in _baseBlockTriangles)
             {
@@ -272,15 +287,20 @@ namespace ProjectWisteria
 
         private void AddZnBlockFaceElems(byte x, byte y, byte z)
         {
-            _verts.Add(new Vector3(x + 1f, y + 1f, z));
-            _verts.Add(new Vector3(x + 1f, y, z));
+            _verts.Add(new Vector3(x + 1, y + 1, z));
+            _verts.Add(new Vector3(x, y + 1, z));
             _verts.Add(new Vector3(x, y, z));
-            _verts.Add(new Vector3(x, y + 1f, z));
+            _verts.Add(new Vector3(x + 1, y, z));
 
-            _uvs.Add(new Vector2(1f, 1f));
-            _uvs.Add(new Vector2(1f, 0f));
-            _uvs.Add(new Vector2(0f, 0f));
-            _uvs.Add(new Vector2(0f, 1f));
+            _normals.Add(new Vector3(0, 0, -1));
+            _normals.Add(new Vector3(0, 0, -1));
+            _normals.Add(new Vector3(0, 0, -1));
+            _normals.Add(new Vector3(0, 0, -1));
+
+            _uvs.Add(new Vector2(0, 0));
+            _uvs.Add(new Vector2(1, 0));
+            _uvs.Add(new Vector2(1, 1));
+            _uvs.Add(new Vector2(0, 1));
 
             foreach (var triangle in _baseBlockTriangles)
             {
