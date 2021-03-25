@@ -19,6 +19,15 @@ namespace ProjectWisteria
         private readonly List<Vector3> _normals = new List<Vector3>();
         private readonly List<int> _tris = new List<int>();
 
+        private readonly SpatialMaterial _material;
+
+        private const string MaterialPath = "res://materials/block.tres";
+
+        public ChunkSectionMeshGenerator()
+        {
+            _material = ResourceLoader.Load(MaterialPath) as SpatialMaterial;
+        }
+
         public void Generate(out ArrayMesh mesh, ChunkSection section)
         {
             if (section.IsOnlyAirs())
@@ -79,12 +88,7 @@ namespace ProjectWisteria
 
             mesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, arrays);
 
-            var material = new SpatialMaterial
-            {
-                AlbedoColor = Color.Color8(255, 255, 255)
-            };
-
-            mesh.SurfaceSetMaterial(0, material);
+            mesh.SurfaceSetMaterial(0, _material);
 
             _verts.Clear();
             _uvs.Clear();
