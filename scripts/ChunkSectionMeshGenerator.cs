@@ -36,43 +36,44 @@ namespace ProjectWisteria
                 return;
             }
 
+            // Create X and Y faces
+            for (byte blockY = 0; blockY < ChunkSectionSize; blockY++)
+            {
+                for (byte blockX = 0; blockX < ChunkSectionSize; blockX++)
+                {
+                    for (byte blockZ = 0; blockZ < ChunkSectionSize;)
+                    {
+                        var startBlock = section.GetBlock(blockX, blockY, blockZ);
+
+                        if (startBlock == BlockType.Air)
+                        {
+                            blockZ++;
+                            continue;
+                        }
+
+                        var mergedZLength = CreateMergedFaceXy(startBlock, section, blockX, blockY, blockZ);
+                        blockZ += mergedZLength;
+                    }
+                }
+            }
+
+            // Create Z faces
             for (byte blockY = 0; blockY < ChunkSectionSize; blockY++)
             {
                 for (byte blockZ = 0; blockZ < ChunkSectionSize; blockZ++)
                 {
-                    for (byte blockX = 0; blockX < ChunkSectionSize; blockX++)
+                    for (byte blockX = 0; blockX < ChunkSectionSize;)
                     {
-                        if (section.GetBlock(blockX, blockY, blockZ) == BlockType.Air) { continue; }
+                        var startBlock = section.GetBlock(blockX, blockY, blockZ);
 
-                        if (IsXpFaceVisible(blockX, blockY, blockZ, section))
+                        if (startBlock == BlockType.Air)
                         {
-                            AddXpBlockFaceElems(blockX, blockY, blockZ);
+                            blockX++;
+                            continue;
                         }
 
-                        if (IsXnFaceVisible(blockX, blockY, blockZ, section))
-                        {
-                            AddXnBlockFaceElems(blockX, blockY, blockZ);
-                        }
-
-                        if (IsYpFaceVisible(blockX, blockY, blockZ, section))
-                        {
-                            AddYpBlockFaceElems(blockX, blockY, blockZ);
-                        }
-
-                        if (IsYnFaceVisible(blockX, blockY, blockZ, section))
-                        {
-                            AddYnBlockFaceElems(blockX, blockY, blockZ);
-                        }
-
-                        if (IsZpFaceVisible(blockX, blockY, blockZ, section))
-                        {
-                            AddZpBlockFaceElems(blockX, blockY, blockZ);
-                        }
-
-                        if (IsZnFaceVisible(blockX, blockY, blockZ, section))
-                        {
-                            AddZnBlockFaceElems(blockX, blockY, blockZ);
-                        }
+                        var mergedZLength = CreateMergedFaceZ(startBlock, section, blockX, blockY, blockZ);
+                        blockX += mergedZLength;
                     }
                 }
             }
@@ -96,8 +97,103 @@ namespace ProjectWisteria
             _tris.Clear();
         }
 
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool IsXpFaceVisible(byte x, byte y, byte z, ChunkSection section)
+        private byte CreateMergedFaceXy(BlockType startBlock, ChunkSection section, byte startX, byte startY,
+            byte startZ)
+        {
+            var isXpFaceVisible = IsXpFaceVisible(startX, startY, startZ, section);
+            var isXnFaceVisible = IsXnFaceVisible(startX, startY, startZ, section);
+            var isYpFaceVisible = IsYpFaceVisible(startX, startY, startZ, section);
+            var isYnFaceVisible = IsYnFaceVisible(startX, startY, startZ, section);
+
+            if (!isXpFaceVisible && !isXnFaceVisible && !isYpFaceVisible && !isYnFaceVisible)
+            {
+                return 1;
+            }
+
+            var length = (byte) 1;
+
+            // Z-axis scanning
+            for (var z = (byte) (startZ + 1); z < ChunkSectionSize; z++)
+            {
+                if (IsDifferentBlock(section, startX, startY, z, startBlock)) { break; }
+
+                if (IsXpFaceVisible(startX, startY, startZ, section)) { isXpFaceVisible = true; }
+
+                if (IsXnFaceVisible(startX, startY, startZ, section)) { isXnFaceVisible = true; }
+
+                if (IsYpFaceVisible(startX, startY, startZ, section)) { isYpFaceVisible = true; }
+
+                if (IsYnFaceVisible(startX, startY, startZ, section)) { isYnFaceVisible = true; }
+
+                length++;
+            }
+
+            if (isXpFaceVisible)
+            {
+                AddXpBlockFaceElems(startX, startY, startZ, length);
+            }
+
+            if (isXnFaceVisible)
+            {
+                AddXnBlockFaceElems(startX, startY, startZ, length);
+            }
+
+            if (isYpFaceVisible)
+            {
+                AddYpBlockFaceElems(startX, startY, startZ, length);
+            }
+
+            if (isYnFaceVisible)
+            {
+                AddYnBlockFaceElems(startX, startY, startZ, length);
+            }
+
+            return length;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private byte CreateMergedFaceZ(BlockType startBlock, ChunkSection section, byte startX, byte startY,
+            byte startZ)
+        {
+            var isZpFaceVisible = IsZpFaceVisible(startX, startY, startZ, section);
+            var isZnFaceVisible = IsZnFaceVisible(startX, startY, startZ, section);
+
+            if (!isZpFaceVisible && !isZnFaceVisible)
+            {
+                return 1;
+            }
+
+            var length = (byte) 1;
+
+            // X-axis scanning
+            for (var x = (byte) (startX + 1); x < ChunkSectionSize; x++)
+            {
+                if (IsDifferentBlock(section, x, startY, startZ, startBlock)) { break; }
+
+                if (IsZpFaceVisible(startX, startY, startZ, section)) { isZpFaceVisible = true; }
+
+                if (IsZnFaceVisible(startX, startY, startZ, section)) { isZnFaceVisible = true; }
+
+                length++;
+            }
+
+            if (isZpFaceVisible)
+            {
+                AddZpBlockFaceElems(startX, startY, startZ, length);
+            }
+
+            if (isZnFaceVisible)
+            {
+                AddZnBlockFaceElems(startX, startY, startZ, length);
+            }
+
+            return length;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool IsXpFaceVisible(byte x, byte y, byte z, ChunkSection section)
         {
             if (x < ChunkSectionSize - 1)
             {
@@ -110,7 +206,7 @@ namespace ProjectWisteria
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool IsXnFaceVisible(byte x, byte y, byte z, ChunkSection section)
+        private static bool IsXnFaceVisible(byte x, byte y, byte z, ChunkSection section)
         {
             if (x > 0)
             {
@@ -123,7 +219,7 @@ namespace ProjectWisteria
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool IsZpFaceVisible(byte x, byte y, byte z, ChunkSection section)
+        private static bool IsZpFaceVisible(byte x, byte y, byte z, ChunkSection section)
         {
             if (z < ChunkSectionSize - 1)
             {
@@ -136,7 +232,7 @@ namespace ProjectWisteria
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool IsZnFaceVisible(byte x, byte y, byte z, ChunkSection section)
+        private static bool IsZnFaceVisible(byte x, byte y, byte z, ChunkSection section)
         {
             if (z > 0)
             {
@@ -149,7 +245,7 @@ namespace ProjectWisteria
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool IsYpFaceVisible(byte x, byte y, byte z, ChunkSection section)
+        private static bool IsYpFaceVisible(byte x, byte y, byte z, ChunkSection section)
         {
             if (y < ChunkSectionSize - 1)
             {
@@ -162,7 +258,7 @@ namespace ProjectWisteria
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool IsYnFaceVisible(byte x, byte y, byte z, ChunkSection section)
+        private static bool IsYnFaceVisible(byte x, byte y, byte z, ChunkSection section)
         {
             if (y > 0)
             {
@@ -174,12 +270,18 @@ namespace ProjectWisteria
             return section.YnNeighbor.GetBlock(x, (byte) (ChunkSectionSize - 1), z) == BlockType.Air;
         }
 
-        private void AddXpBlockFaceElems(byte x, byte y, byte z)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool IsDifferentBlock(ChunkSection section, byte x, byte y, byte z, BlockType currentBlock)
         {
-            _verts.Add(new Vector3(x + 1, y + 1, z + 1));
+            return section.GetBlock(x, y, z) != currentBlock;
+        }
+
+        private void AddXpBlockFaceElems(byte x, byte y, byte z, byte len)
+        {
+            _verts.Add(new Vector3(x + 1, y + 1, z + len));
             _verts.Add(new Vector3(x + 1, y + 1, z));
             _verts.Add(new Vector3(x + 1, y, z));
-            _verts.Add(new Vector3(x + 1, y, z + 1));
+            _verts.Add(new Vector3(x + 1, y, z + len));
 
             _normals.Add(new Vector3(1, 0, 0));
             _normals.Add(new Vector3(1, 0, 0));
@@ -187,8 +289,8 @@ namespace ProjectWisteria
             _normals.Add(new Vector3(1, 0, 0));
 
             _uvs.Add(new Vector2(0, 0));
-            _uvs.Add(new Vector2(1, 0));
-            _uvs.Add(new Vector2(1, 1));
+            _uvs.Add(new Vector2(len, 0));
+            _uvs.Add(new Vector2(len, 1));
             _uvs.Add(new Vector2(0, 1));
 
             foreach (var triangle in _baseBlockTriangles)
@@ -197,11 +299,11 @@ namespace ProjectWisteria
             }
         }
 
-        private void AddXnBlockFaceElems(byte x, byte y, byte z)
+        private void AddXnBlockFaceElems(byte x, byte y, byte z, byte len)
         {
             _verts.Add(new Vector3(x, y + 1, z));
-            _verts.Add(new Vector3(x, y + 1, z + 1));
-            _verts.Add(new Vector3(x, y, z + 1));
+            _verts.Add(new Vector3(x, y + 1, z + len));
+            _verts.Add(new Vector3(x, y, z + len));
             _verts.Add(new Vector3(x, y, z));
 
             _normals.Add(new Vector3(1, 0, 0));
@@ -210,8 +312,8 @@ namespace ProjectWisteria
             _normals.Add(new Vector3(1, 0, 0));
 
             _uvs.Add(new Vector2(0, 0));
-            _uvs.Add(new Vector2(1, 0));
-            _uvs.Add(new Vector2(1, 1));
+            _uvs.Add(new Vector2(len, 0));
+            _uvs.Add(new Vector2(len, 1));
             _uvs.Add(new Vector2(0, 1));
 
             foreach (var triangle in _baseBlockTriangles)
@@ -220,12 +322,12 @@ namespace ProjectWisteria
             }
         }
 
-        private void AddYpBlockFaceElems(byte x, byte y, byte z)
+        private void AddYpBlockFaceElems(byte x, byte y, byte z, byte len)
         {
             _verts.Add(new Vector3(x, y + 1, z));
             _verts.Add(new Vector3(x + 1, y + 1, z));
-            _verts.Add(new Vector3(x + 1, y + 1, z + 1));
-            _verts.Add(new Vector3(x, y + 1, z + 1));
+            _verts.Add(new Vector3(x + 1, y + 1, z + len));
+            _verts.Add(new Vector3(x, y + 1, z + len));
 
             _normals.Add(new Vector3(0, 1, 0));
             _normals.Add(new Vector3(0, 1, 0));
@@ -234,8 +336,8 @@ namespace ProjectWisteria
 
             _uvs.Add(new Vector2(0, 0));
             _uvs.Add(new Vector2(1, 0));
-            _uvs.Add(new Vector2(1, 1));
-            _uvs.Add(new Vector2(0, 1));
+            _uvs.Add(new Vector2(1, len));
+            _uvs.Add(new Vector2(0, len));
 
             foreach (var triangle in _baseBlockTriangles)
             {
@@ -243,10 +345,10 @@ namespace ProjectWisteria
             }
         }
 
-        private void AddYnBlockFaceElems(byte x, byte y, byte z)
+        private void AddYnBlockFaceElems(byte x, byte y, byte z, byte len)
         {
-            _verts.Add(new Vector3(x, y, z + 1));
-            _verts.Add(new Vector3(x + 1, y, z + 1));
+            _verts.Add(new Vector3(x, y, z + len));
+            _verts.Add(new Vector3(x + 1, y, z + len));
             _verts.Add(new Vector3(x + 1, y, z));
             _verts.Add(new Vector3(x, y, z));
 
@@ -257,8 +359,8 @@ namespace ProjectWisteria
 
             _uvs.Add(new Vector2(0, 0));
             _uvs.Add(new Vector2(1, 0));
-            _uvs.Add(new Vector2(1, 1));
-            _uvs.Add(new Vector2(0, 1));
+            _uvs.Add(new Vector2(1, len));
+            _uvs.Add(new Vector2(0, len));
 
             foreach (var triangle in _baseBlockTriangles)
             {
@@ -266,11 +368,11 @@ namespace ProjectWisteria
             }
         }
 
-        private void AddZpBlockFaceElems(byte x, byte y, byte z)
+        private void AddZpBlockFaceElems(byte x, byte y, byte z, byte len)
         {
             _verts.Add(new Vector3(x, y + 1, z + 1));
-            _verts.Add(new Vector3(x + 1, y + 1, z + 1));
-            _verts.Add(new Vector3(x + 1, y, z + 1));
+            _verts.Add(new Vector3(x + len, y + 1, z + 1));
+            _verts.Add(new Vector3(x + len, y, z + 1));
             _verts.Add(new Vector3(x, y, z + 1));
 
             _normals.Add(new Vector3(0, 0, 1));
@@ -279,8 +381,8 @@ namespace ProjectWisteria
             _normals.Add(new Vector3(0, 0, 1));
 
             _uvs.Add(new Vector2(0, 0));
-            _uvs.Add(new Vector2(1, 0));
-            _uvs.Add(new Vector2(1, 1));
+            _uvs.Add(new Vector2(len, 0));
+            _uvs.Add(new Vector2(len, 1));
             _uvs.Add(new Vector2(0, 1));
 
             foreach (var triangle in _baseBlockTriangles)
@@ -289,12 +391,12 @@ namespace ProjectWisteria
             }
         }
 
-        private void AddZnBlockFaceElems(byte x, byte y, byte z)
+        private void AddZnBlockFaceElems(byte x, byte y, byte z, byte len)
         {
-            _verts.Add(new Vector3(x + 1, y + 1, z));
+            _verts.Add(new Vector3(x + len, y + 1, z));
             _verts.Add(new Vector3(x, y + 1, z));
             _verts.Add(new Vector3(x, y, z));
-            _verts.Add(new Vector3(x + 1, y, z));
+            _verts.Add(new Vector3(x + len, y, z));
 
             _normals.Add(new Vector3(0, 0, -1));
             _normals.Add(new Vector3(0, 0, -1));
@@ -302,8 +404,8 @@ namespace ProjectWisteria
             _normals.Add(new Vector3(0, 0, -1));
 
             _uvs.Add(new Vector2(0, 0));
-            _uvs.Add(new Vector2(1, 0));
-            _uvs.Add(new Vector2(1, 1));
+            _uvs.Add(new Vector2(len, 0));
+            _uvs.Add(new Vector2(len, 1));
             _uvs.Add(new Vector2(0, 1));
 
             foreach (var triangle in _baseBlockTriangles)
