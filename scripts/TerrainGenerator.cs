@@ -15,7 +15,14 @@ namespace ProjectWisteria
                     {
                         if (coord.Y < 0)
                         {
-                            section.SetBlock(x, y, z, BlockType.Dirt);
+                            if (coord.Y == -1 && y == ChunkSectionSize - 1)
+                            {
+                                section.SetBlock(x, y, z, BlockType.Grass);
+                            }
+                            else
+                            {
+                                section.SetBlock(x, y, z, BlockType.Dirt);
+                            }
                         }
                     }
                 }

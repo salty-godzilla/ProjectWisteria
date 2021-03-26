@@ -16,16 +16,19 @@ namespace ProjectWisteria
 
         private readonly List<Vector3> _verts = new List<Vector3>();
         private readonly List<Vector2> _uvs = new List<Vector2>();
+        private readonly List<Vector2> _uv2s = new List<Vector2>();
         private readonly List<Vector3> _normals = new List<Vector3>();
         private readonly List<int> _tris = new List<int>();
 
-        private readonly SpatialMaterial _material;
+        private readonly ShaderMaterial _material;
 
-        private const string MaterialPath = "res://materials/block.tres";
+        private const string MaterialPath = "res://materials/block_array.tres";
 
         public ChunkSectionMeshGenerator()
         {
-            _material = ResourceLoader.Load(MaterialPath) as SpatialMaterial;
+            _material = ResourceLoader.Load(MaterialPath) as ShaderMaterial;
+
+            _material.SetShaderParam("texture_albedo", BlockDictionary.Instance.TextureArray);
         }
 
         public void Generate(out ArrayMesh mesh, ChunkSection section)
@@ -84,6 +87,7 @@ namespace ProjectWisteria
             arrays.Resize((int) Mesh.ArrayType.Max);
             arrays[(int) Mesh.ArrayType.Vertex] = _verts.ToArray();
             arrays[(int) Mesh.ArrayType.TexUv] = _uvs.ToArray();
+            arrays[(int) Mesh.ArrayType.TexUv2] = _uv2s.ToArray();
             arrays[(int) Mesh.ArrayType.Normal] = _normals.ToArray();
             arrays[(int) Mesh.ArrayType.Index] = _tris.ToArray();
 
@@ -93,6 +97,7 @@ namespace ProjectWisteria
 
             _verts.Clear();
             _uvs.Clear();
+            _uv2s.Clear();
             _normals.Clear();
             _tris.Clear();
         }
@@ -132,22 +137,22 @@ namespace ProjectWisteria
 
             if (isXpFaceVisible)
             {
-                AddXpBlockFaceElems(startX, startY, startZ, length);
+                AddXpBlockFaceElems(startX, startY, startZ, length, startBlock);
             }
 
             if (isXnFaceVisible)
             {
-                AddXnBlockFaceElems(startX, startY, startZ, length);
+                AddXnBlockFaceElems(startX, startY, startZ, length, startBlock);
             }
 
             if (isYpFaceVisible)
             {
-                AddYpBlockFaceElems(startX, startY, startZ, length);
+                AddYpBlockFaceElems(startX, startY, startZ, length, startBlock);
             }
 
             if (isYnFaceVisible)
             {
-                AddYnBlockFaceElems(startX, startY, startZ, length);
+                AddYnBlockFaceElems(startX, startY, startZ, length, startBlock);
             }
 
             return length;
@@ -181,12 +186,12 @@ namespace ProjectWisteria
 
             if (isZpFaceVisible)
             {
-                AddZpBlockFaceElems(startX, startY, startZ, length);
+                AddZpBlockFaceElems(startX, startY, startZ, length, startBlock);
             }
 
             if (isZnFaceVisible)
             {
-                AddZnBlockFaceElems(startX, startY, startZ, length);
+                AddZnBlockFaceElems(startX, startY, startZ, length, startBlock);
             }
 
             return length;
@@ -276,7 +281,7 @@ namespace ProjectWisteria
             return section.GetBlock(x, y, z) != currentBlock;
         }
 
-        private void AddXpBlockFaceElems(byte x, byte y, byte z, byte len)
+        private void AddXpBlockFaceElems(byte x, byte y, byte z, byte len, BlockType block)
         {
             _verts.Add(new Vector3(x + 1, y + 1, z + len));
             _verts.Add(new Vector3(x + 1, y + 1, z));
@@ -293,13 +298,20 @@ namespace ProjectWisteria
             _uvs.Add(new Vector2(len, 1));
             _uvs.Add(new Vector2(0, 1));
 
+            var textureLayer = BlockDictionary.Instance.Blocks[block].XpTextureIndex;
+
+            _uv2s.Add(new Vector2(textureLayer, 0));
+            _uv2s.Add(new Vector2(textureLayer, 0));
+            _uv2s.Add(new Vector2(textureLayer, 0));
+            _uv2s.Add(new Vector2(textureLayer, 0));
+
             foreach (var triangle in _baseBlockTriangles)
             {
                 _tris.Add(triangle + _verts.Count - 4);
             }
         }
 
-        private void AddXnBlockFaceElems(byte x, byte y, byte z, byte len)
+        private void AddXnBlockFaceElems(byte x, byte y, byte z, byte len, BlockType block)
         {
             _verts.Add(new Vector3(x, y + 1, z));
             _verts.Add(new Vector3(x, y + 1, z + len));
@@ -316,13 +328,20 @@ namespace ProjectWisteria
             _uvs.Add(new Vector2(len, 1));
             _uvs.Add(new Vector2(0, 1));
 
+            var textureLayer = BlockDictionary.Instance.Blocks[block].XnTextureIndex;
+
+            _uv2s.Add(new Vector2(textureLayer, 0));
+            _uv2s.Add(new Vector2(textureLayer, 0));
+            _uv2s.Add(new Vector2(textureLayer, 0));
+            _uv2s.Add(new Vector2(textureLayer, 0));
+
             foreach (var triangle in _baseBlockTriangles)
             {
                 _tris.Add(triangle + _verts.Count - 4);
             }
         }
 
-        private void AddYpBlockFaceElems(byte x, byte y, byte z, byte len)
+        private void AddYpBlockFaceElems(byte x, byte y, byte z, byte len, BlockType block)
         {
             _verts.Add(new Vector3(x, y + 1, z));
             _verts.Add(new Vector3(x + 1, y + 1, z));
@@ -339,13 +358,20 @@ namespace ProjectWisteria
             _uvs.Add(new Vector2(1, len));
             _uvs.Add(new Vector2(0, len));
 
+            var textureLayer = BlockDictionary.Instance.Blocks[block].YpTextureIndex;
+
+            _uv2s.Add(new Vector2(textureLayer, 0));
+            _uv2s.Add(new Vector2(textureLayer, 0));
+            _uv2s.Add(new Vector2(textureLayer, 0));
+            _uv2s.Add(new Vector2(textureLayer, 0));
+
             foreach (var triangle in _baseBlockTriangles)
             {
                 _tris.Add(triangle + _verts.Count - 4);
             }
         }
 
-        private void AddYnBlockFaceElems(byte x, byte y, byte z, byte len)
+        private void AddYnBlockFaceElems(byte x, byte y, byte z, byte len, BlockType block)
         {
             _verts.Add(new Vector3(x, y, z + len));
             _verts.Add(new Vector3(x + 1, y, z + len));
@@ -362,13 +388,20 @@ namespace ProjectWisteria
             _uvs.Add(new Vector2(1, len));
             _uvs.Add(new Vector2(0, len));
 
+            var textureLayer = BlockDictionary.Instance.Blocks[block].YnTextureIndex;
+
+            _uv2s.Add(new Vector2(textureLayer, 0));
+            _uv2s.Add(new Vector2(textureLayer, 0));
+            _uv2s.Add(new Vector2(textureLayer, 0));
+            _uv2s.Add(new Vector2(textureLayer, 0));
+
             foreach (var triangle in _baseBlockTriangles)
             {
                 _tris.Add(triangle + _verts.Count - 4);
             }
         }
 
-        private void AddZpBlockFaceElems(byte x, byte y, byte z, byte len)
+        private void AddZpBlockFaceElems(byte x, byte y, byte z, byte len, BlockType block)
         {
             _verts.Add(new Vector3(x, y + 1, z + 1));
             _verts.Add(new Vector3(x + len, y + 1, z + 1));
@@ -385,13 +418,20 @@ namespace ProjectWisteria
             _uvs.Add(new Vector2(len, 1));
             _uvs.Add(new Vector2(0, 1));
 
+            var textureLayer = BlockDictionary.Instance.Blocks[block].ZpTextureIndex;
+
+            _uv2s.Add(new Vector2(textureLayer, 0));
+            _uv2s.Add(new Vector2(textureLayer, 0));
+            _uv2s.Add(new Vector2(textureLayer, 0));
+            _uv2s.Add(new Vector2(textureLayer, 0));
+
             foreach (var triangle in _baseBlockTriangles)
             {
                 _tris.Add(triangle + _verts.Count - 4);
             }
         }
 
-        private void AddZnBlockFaceElems(byte x, byte y, byte z, byte len)
+        private void AddZnBlockFaceElems(byte x, byte y, byte z, byte len, BlockType block)
         {
             _verts.Add(new Vector3(x + len, y + 1, z));
             _verts.Add(new Vector3(x, y + 1, z));
@@ -407,6 +447,13 @@ namespace ProjectWisteria
             _uvs.Add(new Vector2(len, 0));
             _uvs.Add(new Vector2(len, 1));
             _uvs.Add(new Vector2(0, 1));
+
+            var textureLayer = BlockDictionary.Instance.Blocks[block].ZnTextureIndex;
+
+            _uv2s.Add(new Vector2(textureLayer, 0));
+            _uv2s.Add(new Vector2(textureLayer, 0));
+            _uv2s.Add(new Vector2(textureLayer, 0));
+            _uv2s.Add(new Vector2(textureLayer, 0));
 
             foreach (var triangle in _baseBlockTriangles)
             {
