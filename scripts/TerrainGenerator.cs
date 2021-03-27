@@ -5,6 +5,14 @@ namespace ProjectWisteria
 {
     public class TerrainGenerator
     {
+        private readonly FastNoiseLite _noise;
+
+        public TerrainGenerator()
+        {
+            _noise = new FastNoiseLite();
+            _noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
+        }
+
         public void Generate(ChunkSection section, ChunkSectionGlobalCoord coord)
         {
             for (byte y = 0; y < ChunkSectionSize; y++)
@@ -13,7 +21,18 @@ namespace ProjectWisteria
                 {
                     for (byte x = 0; x < ChunkSectionSize; x++)
                     {
-                        if (coord.Y < 0)
+                        var blockGlobalX = coord.X * ChunkSectionSize + x;
+                        var blockGlobalY = coord.Y * ChunkSectionSize + y;
+                        var blockGlobalZ = coord.Z * ChunkSectionSize + z;
+
+                        var height = (int) (_noise.GetNoise(blockGlobalX * 2f, blockGlobalZ * 2f) * 4
+                                            + _noise.GetNoise(blockGlobalX, blockGlobalZ) * 4);
+
+                        if (height == blockGlobalY)
+                        {
+                            section.SetBlock(x, y, z, BlockType.Grass);
+                        }
+                        else if (height > blockGlobalY)
                         {
                             section.SetBlock(x, y, z, BlockType.Dirt);
                         }
