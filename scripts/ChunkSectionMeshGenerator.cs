@@ -124,13 +124,13 @@ namespace ProjectWisteria
             {
                 if (IsDifferentBlock(section, startX, startY, z, startBlock)) { break; }
 
-                if (IsXpFaceVisible(startX, startY, startZ, section)) { isXpFaceVisible = true; }
+                if (IsXpFaceVisible(startX, startY, z, section)) { isXpFaceVisible = true; }
 
-                if (IsXnFaceVisible(startX, startY, startZ, section)) { isXnFaceVisible = true; }
+                if (IsXnFaceVisible(startX, startY, z, section)) { isXnFaceVisible = true; }
 
-                if (IsYpFaceVisible(startX, startY, startZ, section)) { isYpFaceVisible = true; }
+                if (IsYpFaceVisible(startX, startY, z, section)) { isYpFaceVisible = true; }
 
-                if (IsYnFaceVisible(startX, startY, startZ, section)) { isYnFaceVisible = true; }
+                if (IsYnFaceVisible(startX, startY, z, section)) { isYnFaceVisible = true; }
 
                 length++;
             }
@@ -177,9 +177,9 @@ namespace ProjectWisteria
             {
                 if (IsDifferentBlock(section, x, startY, startZ, startBlock)) { break; }
 
-                if (IsZpFaceVisible(startX, startY, startZ, section)) { isZpFaceVisible = true; }
+                if (IsZpFaceVisible(x, startY, startZ, section)) { isZpFaceVisible = true; }
 
-                if (IsZnFaceVisible(startX, startY, startZ, section)) { isZnFaceVisible = true; }
+                if (IsZnFaceVisible(x, startY, startZ, section)) { isZnFaceVisible = true; }
 
                 length++;
             }
