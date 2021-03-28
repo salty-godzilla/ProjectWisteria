@@ -5,14 +5,15 @@ using Path = System.IO.Path;
 
 namespace ProjectWisteria
 {
+    // ReSharper disable once ClassNeverInstantiated.Global
+    // ReSharper disable once UnusedType.Global
     public class BlockDictionary : Node
     {
-        public Dictionary<BlockType, Block> Blocks = new();
-        public Dictionary<string, int> Textures = new();
+        public readonly Dictionary<BlockType, Block> Blocks = new();
+        public readonly Dictionary<string, int> Textures = new();
+        public TextureArray TextureArray { get; private set; } = null!;
 
-        public TextureArray TextureArray { get; private set; }
-
-        public static BlockDictionary Instance { get; private set; }
+        public static BlockDictionary Instance { get; private set; } = null!;
 
         public override void _Ready()
         {

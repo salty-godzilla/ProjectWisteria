@@ -6,19 +6,17 @@ using static ProjectWisteria.WorldConstants;
 
 namespace ProjectWisteria
 {
+    // ReSharper disable once ClassNeverInstantiated.Global
+    // ReSharper disable once UnusedType.Global
     public class World : Node
     {
         private readonly Dictionary<ChunkCoord, Chunk> _chunks = new();
+        private readonly Dictionary<ChunkSectionGlobalCoord, Node> _sectionNodes = new();
 
-        private readonly Dictionary<ChunkSectionGlobalCoord, Node> _sectionNodes =
-            new();
+        private readonly Queue<ChunkSectionGlobalCoord> _needRenderUpdateChunkSections = new();
 
-        private readonly Queue<ChunkSectionGlobalCoord> _needRenderUpdateChunkSections =
-            new();
-
-        private TerrainGenerator _terrainGenerator;
-
-        private ChunkSectionMeshGenerator _chunkSectionMeshGenerator;
+        private TerrainGenerator _terrainGenerator = null!;
+        private ChunkSectionMeshGenerator _chunkSectionMeshGenerator = null!;
 
         public override void _Ready()
         {

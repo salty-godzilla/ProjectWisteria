@@ -2,6 +2,8 @@ using Godot;
 
 namespace ProjectWisteria
 {
+    // ReSharper disable once ClassNeverInstantiated.Global
+    // ReSharper disable once UnusedType.Global
     public class AxisLines : ImmediateGeometry
     {
         private readonly Color _xOriginColor = Color.Color8(255, 0, 0);

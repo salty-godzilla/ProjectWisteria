@@ -16,6 +16,8 @@ namespace ProjectWisteria
 
         private readonly List<Vector3> _verts = new();
         private readonly List<Vector2> _uvs = new();
+
+        // ReSharper disable once InconsistentNaming
         private readonly List<Vector2> _uv2s = new();
         private readonly List<Vector3> _normals = new();
         private readonly List<int> _tris = new();
@@ -26,12 +28,12 @@ namespace ProjectWisteria
 
         public ChunkSectionMeshGenerator()
         {
-            _material = ResourceLoader.Load(MaterialPath) as ShaderMaterial;
+            _material = (ResourceLoader.Load(MaterialPath) as ShaderMaterial)!;
 
             _material.SetShaderParam("texture_albedo", BlockDictionary.Instance.TextureArray);
         }
 
-        public void Generate(out ArrayMesh mesh, ChunkSection section)
+        public void Generate(out ArrayMesh? mesh, ChunkSection section)
         {
             if (section.IsOnlyAirs())
             {

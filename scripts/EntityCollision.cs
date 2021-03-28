@@ -3,6 +3,8 @@ using Godot;
 
 namespace ProjectWisteria
 {
+    // ReSharper disable once ClassNeverInstantiated.Global
+    // ReSharper disable once UnusedType.Global
     public class EntityCollision : Spatial
     {
         private AABB _aabb;
@@ -11,23 +13,23 @@ namespace ProjectWisteria
         private readonly float _height = 2f;
         private readonly float _depth = 1f;
 
-        private World _world;
+        private World _world = null!;
 
         public bool Hit;
 
-        private float offsetX;
-        private float offsetZ;
+        private float _offsetX;
+        private float _offsetZ;
 
         public override void _Ready()
         {
-            _world = GetNode("/root/Root/World") as World;
+            _world = GetNode<World>("/root/Root/World");
 
-            offsetX = _width / 2f;
-            offsetZ = _depth / 2f;
+            _offsetX = _width / 2f;
+            _offsetZ = _depth / 2f;
 
             var startPosition = GlobalTransform.origin;
-            startPosition.x -= offsetX;
-            startPosition.z -= offsetZ;
+            startPosition.x -= _offsetX;
+            startPosition.z -= _offsetZ;
 
             _aabb.Position = startPosition;
             _aabb.Size = new Vector3(_width, _height, _depth);
@@ -36,8 +38,8 @@ namespace ProjectWisteria
         public float Move(float dx, float dy, float dz)
         {
             var startPosition = GlobalTransform.origin;
-            startPosition.x -= offsetX;
-            startPosition.z -= offsetZ;
+            startPosition.x -= _offsetX;
+            startPosition.z -= _offsetZ;
 
             _aabb.Position = startPosition + new Vector3(dx, dy, dz);
 

@@ -4,7 +4,7 @@ namespace ProjectWisteria
 {
     public class Chunk
     {
-        public ChunkSection[] Sections = new ChunkSection[ChunkSections];
+        public readonly ChunkSection[] Sections = new ChunkSection[ChunkSections];
 
         public Chunk()
         {

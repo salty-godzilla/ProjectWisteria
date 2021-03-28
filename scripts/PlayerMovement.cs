@@ -2,6 +2,8 @@ using Godot;
 
 namespace ProjectWisteria
 {
+    // ReSharper disable once ClassNeverInstantiated.Global
+    // ReSharper disable once UnusedType.Global
     public class PlayerMovement : Spatial
     {
         private const float FloorMaxAngleDeg = 50;
