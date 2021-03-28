@@ -46,6 +46,12 @@ namespace ProjectWisteria
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public BlockType GetBlock(int x, int y, int z)
+        {
+            return _blocks[GetBlockArrayIndex((byte) x, (byte) y, (byte) z)];
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public BlockType GetBlock(ushort blockArrayIndex)
         {
             return _blocks[blockArrayIndex];

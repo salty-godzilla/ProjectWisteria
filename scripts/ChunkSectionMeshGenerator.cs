@@ -1,8 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Godot;
-using Godot.Collections;
 using static ProjectWisteria.WorldConstants;
+using Array = Godot.Collections.Array;
 
 namespace ProjectWisteria
 {
@@ -29,6 +30,61 @@ namespace ProjectWisteria
             _material = ResourceLoader.Load(MaterialPath) as ShaderMaterial;
         }
 
+        private bool IsValidBlockPosInChunkSection(int x, int y, int z)
+        {
+            var invalid = x < 0 || x >= ChunkSectionSize || y < 0 || y >= ChunkSectionSize || z < 0 ||
+                          z >= ChunkSectionSize;
+
+            return !invalid;
+        }
+
+        public int GetNeighborBlockExists(int blockX, int blockY, int blockZ, ChunkSection section)
+        {
+            var index = 0;
+            var neighborBlocks = 0;
+
+            for (var y = 0; y <= 1; y++)
+            {
+                for (var z = -1; z <= 1; z++)
+                {
+                    for (var x = -1; x <= 1; x++)
+                    {
+                        if (x == 0 && y == 0 && z == 0) { continue; }
+
+                        if (IsValidBlockPosInChunkSection(blockX + x, blockY + y, blockZ + z))
+                        {
+                            var exists = section.GetBlock(blockX + x, blockY + y, blockZ + z) != BlockType.Air;
+                            if (exists)
+                            {
+                                neighborBlocks |= 1 << (16 - index);
+                            }
+                            else
+                            {
+                                neighborBlocks &= ~(1 << (16 - index));
+                            }
+                        }
+                        else
+                        {
+                            neighborBlocks &= ~(1 << (16 - index));
+                        }
+
+                        index++;
+                    }
+                }
+            }
+
+            //GD.Print(Convert.ToString(neighborBlocks, 2));
+
+            return neighborBlocks;
+        }
+
+        public int GetAmbientOcclusionLevel(bool side0, bool side1, bool corner)
+        {
+            if (side0 && side1) { return 0; }
+
+            return 3 - (side0 ? 1 : 0) - (side1 ? 1 : 0) - (corner ? 1 : 0);
+        }
+
         public void Generate(out ArrayMesh mesh, ChunkSection section)
         {
             if (section.IsOnlyAirs())
@@ -45,6 +101,8 @@ namespace ProjectWisteria
                     {
                         if (section.GetBlock(blockX, blockY, blockZ) == BlockType.Air) { continue; }
 
+                        var neighbor = GetNeighborBlockExists(blockX, blockY, blockZ, section);
+
                         if (IsXpFaceVisible(blockX, blockY, blockZ, section))
                         {
                             AddXpBlockFaceElems(blockX, blockY, blockZ);
@@ -57,7 +115,9 @@ namespace ProjectWisteria
 
                         if (IsYpFaceVisible(blockX, blockY, blockZ, section))
                         {
-                            AddYpBlockFaceElems(blockX, blockY, blockZ);
+                            var aoLevels = CalculateYpBlockFaceAoLevel(neighbor);
+
+                            AddYpBlockFaceElems(blockX, blockY, blockZ, aoLevels);
                         }
 
                         if (IsYnFaceVisible(blockX, blockY, blockZ, section))
@@ -109,7 +169,7 @@ namespace ProjectWisteria
 
             if (section.XpNeighbor == null) { return true; }
 
-            return section.XpNeighbor.GetBlock(0, y, z) == BlockType.Air;
+            return section.XpNeighbor.GetBlock((byte) 0, y, z) == BlockType.Air;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -135,7 +195,7 @@ namespace ProjectWisteria
 
             if (section.ZpNeighbor == null) { return true; }
 
-            return section.ZpNeighbor.GetBlock(x, y, 0) == BlockType.Air;
+            return section.ZpNeighbor.GetBlock(x, y, (byte) 0) == BlockType.Air;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -161,7 +221,7 @@ namespace ProjectWisteria
 
             if (section.YpNeighbor == null) { return true; }
 
-            return section.YpNeighbor.GetBlock(x, 0, z) == BlockType.Air;
+            return section.YpNeighbor.GetBlock(x, (byte) 0, z) == BlockType.Air;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -233,17 +293,36 @@ namespace ProjectWisteria
             }
         }
 
-        private void AddYpBlockFaceElems(byte x, byte y, byte z)
+        private void AddYpBlockFaceElems(byte x, byte y, byte z, List<int> levels)
         {
             _verts.Add(new Vector3(x, y + 1, z));
             _verts.Add(new Vector3(x + 1, y + 1, z));
             _verts.Add(new Vector3(x + 1, y + 1, z + 1));
             _verts.Add(new Vector3(x, y + 1, z + 1));
 
-            _vertsColor.Add(new Color(0, 0, 0, 0.3f));
-            _vertsColor.Add(new Color(0, 1, 1, 0.3f));
-            _vertsColor.Add(new Color(1, 1, 0, 0.3f));
-            _vertsColor.Add(new Color(0, 1, 0, 0.3f));
+            for (var i = 0; i < 4; i++)
+            {
+                Color color;
+                switch (levels[i])
+                {
+                    case 3:
+                        color = new Color(1, 1, 1);
+                        break;
+                    case 2:
+                        color = new Color(.5f, .5f, .5f);
+                        break;
+                    case 1:
+                        color = new Color(.3f, .3f, .3f);
+                        break;
+                    case 0:
+                        color = new Color(.15f, .15f, .15f);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
+                _vertsColor.Add(color);
+            }
 
             _normals.Add(new Vector3(0, 1, 0));
             _normals.Add(new Vector3(0, 1, 0));
@@ -343,6 +422,35 @@ namespace ProjectWisteria
             {
                 _tris.Add(triangle + _verts.Count - 4);
             }
+        }
+
+        private List<int> CalculateYpBlockFaceAoLevel(int neighbor)
+        {
+            var ac = ((neighbor >> 8) & 1) == 1;
+            var as0 = ((neighbor >> 7) & 1) == 1;
+            var as1 = ((neighbor >> 5) & 1) == 1;
+
+            var bc = ((neighbor >> 6) & 1) == 1;
+            var bs0 = ((neighbor >> 7) & 1) == 1;
+            var bs1 = ((neighbor >> 3) & 1) == 1;
+
+            var cc = ((neighbor >> 0) & 1) == 1;
+            var cs0 = ((neighbor >> 1) & 1) == 1;
+            var cs1 = ((neighbor >> 3) & 1) == 1;
+
+            var dc = ((neighbor >> 2) & 1) == 1;
+            var ds0 = ((neighbor >> 1) & 1) == 1;
+            var ds1 = ((neighbor >> 5) & 1) == 1;
+
+            var levels = new List<int>
+            {
+                GetAmbientOcclusionLevel(as0, as1, ac),
+                GetAmbientOcclusionLevel(bs0, bs1, bc),
+                GetAmbientOcclusionLevel(cs0, cs1, cc),
+                GetAmbientOcclusionLevel(ds0, ds1, dc)
+            };
+
+            return levels;
         }
     }
 }
