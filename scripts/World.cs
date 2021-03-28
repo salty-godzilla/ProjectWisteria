@@ -8,13 +8,13 @@ namespace ProjectWisteria
 {
     public class World : Node
     {
-        private readonly Dictionary<ChunkCoord, Chunk> _chunks = new Dictionary<ChunkCoord, Chunk>();
+        private readonly Dictionary<ChunkCoord, Chunk> _chunks = new();
 
         private readonly Dictionary<ChunkSectionGlobalCoord, Node> _sectionNodes =
-            new Dictionary<ChunkSectionGlobalCoord, Node>();
+            new();
 
         private readonly Queue<ChunkSectionGlobalCoord> _needRenderUpdateChunkSections =
-            new Queue<ChunkSectionGlobalCoord>();
+            new();
 
         private TerrainGenerator _terrainGenerator;
 

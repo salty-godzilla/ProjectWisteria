@@ -14,11 +14,11 @@ namespace ProjectWisteria
             0, 2, 3 // 1
         };
 
-        private readonly List<Vector3> _verts = new List<Vector3>();
-        private readonly List<Vector2> _uvs = new List<Vector2>();
-        private readonly List<Vector2> _uv2s = new List<Vector2>();
-        private readonly List<Vector3> _normals = new List<Vector3>();
-        private readonly List<int> _tris = new List<int>();
+        private readonly List<Vector3> _verts = new();
+        private readonly List<Vector2> _uvs = new();
+        private readonly List<Vector2> _uv2s = new();
+        private readonly List<Vector3> _normals = new();
+        private readonly List<int> _tris = new();
 
         private readonly ShaderMaterial _material;
 

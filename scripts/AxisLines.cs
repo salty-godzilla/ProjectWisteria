@@ -13,7 +13,7 @@ namespace ProjectWisteria
         private readonly Color _zOriginColor = Color.Color8(0, 0, 255);
         private readonly Color _zPosColor = Color.Color8(50, 50, 255);
 
-        private readonly Vector3 _drawOrigin = new Vector3(0, 0, -10f);
+        private readonly Vector3 _drawOrigin = new(0, 0, -10f);
 
         public override void _Process(float delta)
         {

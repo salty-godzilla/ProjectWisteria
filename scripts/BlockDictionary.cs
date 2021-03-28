@@ -7,8 +7,8 @@ namespace ProjectWisteria
 {
     public class BlockDictionary : Node
     {
-        public Dictionary<BlockType, Block> Blocks = new Dictionary<BlockType, Block>();
-        public Dictionary<string, int> Textures = new Dictionary<string, int>();
+        public Dictionary<BlockType, Block> Blocks = new();
+        public Dictionary<string, int> Textures = new();
 
         public TextureArray TextureArray { get; private set; }
 
