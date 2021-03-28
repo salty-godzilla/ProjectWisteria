@@ -1,6 +1,17 @@
-[gd_resource type="SpatialMaterial" load_steps=2 format=2]
+[gd_resource type="ShaderMaterial" load_steps=3 format=2]
 
-[ext_resource path="res://textures/block_atlas.png" type="Texture" id=1]
+[ext_resource path="res://materials/block.shader" type="Shader" id=1]
+[ext_resource path="res://textures/dirt.png" type="Texture" id=2]
 
 [resource]
-albedo_texture = ExtResource( 1 )
+shader = ExtResource( 1 )
+shader_param/albedo = Color( 1, 1, 1, 1 )
+shader_param/specular = null
+shader_param/metallic = null
+shader_param/roughness = null
+shader_param/point_size = null
+shader_param/uv1_scale = Vector3( 1, 1, 1 )
+shader_param/uv1_offset = null
+shader_param/uv2_scale = null
+shader_param/uv2_offset = null
+shader_param/texture_albedo = ExtResource( 2 )

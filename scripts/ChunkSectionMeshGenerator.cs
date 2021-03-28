@@ -15,17 +15,18 @@ namespace ProjectWisteria
         };
 
         private readonly List<Vector3> _verts = new List<Vector3>();
+        private readonly List<Color> _vertsColor = new List<Color>();
         private readonly List<Vector2> _uvs = new List<Vector2>();
         private readonly List<Vector3> _normals = new List<Vector3>();
         private readonly List<int> _tris = new List<int>();
 
-        private readonly SpatialMaterial _material;
+        private readonly ShaderMaterial _material;
 
         private const string MaterialPath = "res://materials/block.tres";
 
         public ChunkSectionMeshGenerator()
         {
-            _material = ResourceLoader.Load(MaterialPath) as SpatialMaterial;
+            _material = ResourceLoader.Load(MaterialPath) as ShaderMaterial;
         }
 
         public void Generate(out ArrayMesh mesh, ChunkSection section)
@@ -82,6 +83,7 @@ namespace ProjectWisteria
             var arrays = new Array();
             arrays.Resize((int) Mesh.ArrayType.Max);
             arrays[(int) Mesh.ArrayType.Vertex] = _verts.ToArray();
+            arrays[(int) Mesh.ArrayType.Color] = _vertsColor.ToArray();
             arrays[(int) Mesh.ArrayType.TexUv] = _uvs.ToArray();
             arrays[(int) Mesh.ArrayType.Normal] = _normals.ToArray();
             arrays[(int) Mesh.ArrayType.Index] = _tris.ToArray();
@@ -91,6 +93,7 @@ namespace ProjectWisteria
             mesh.SurfaceSetMaterial(0, _material);
 
             _verts.Clear();
+            _vertsColor.Clear();
             _uvs.Clear();
             _normals.Clear();
             _tris.Clear();
@@ -181,6 +184,11 @@ namespace ProjectWisteria
             _verts.Add(new Vector3(x + 1, y, z));
             _verts.Add(new Vector3(x + 1, y, z + 1));
 
+            _vertsColor.Add(new Color(1, 1, 1, 0.3f));
+            _vertsColor.Add(new Color(1, 1, 1, 0.3f));
+            _vertsColor.Add(new Color(1, 1, 1, 0.3f));
+            _vertsColor.Add(new Color(1, 1, 1, 0.3f));
+
             _normals.Add(new Vector3(1, 0, 0));
             _normals.Add(new Vector3(1, 0, 0));
             _normals.Add(new Vector3(1, 0, 0));
@@ -203,6 +211,11 @@ namespace ProjectWisteria
             _verts.Add(new Vector3(x, y + 1, z + 1));
             _verts.Add(new Vector3(x, y, z + 1));
             _verts.Add(new Vector3(x, y, z));
+
+            _vertsColor.Add(new Color(1, 1, 1, 0.3f));
+            _vertsColor.Add(new Color(1, 1, 1, 0.3f));
+            _vertsColor.Add(new Color(1, 1, 1, 0.3f));
+            _vertsColor.Add(new Color(1, 1, 1, 0.3f));
 
             _normals.Add(new Vector3(1, 0, 0));
             _normals.Add(new Vector3(1, 0, 0));
@@ -227,6 +240,11 @@ namespace ProjectWisteria
             _verts.Add(new Vector3(x + 1, y + 1, z + 1));
             _verts.Add(new Vector3(x, y + 1, z + 1));
 
+            _vertsColor.Add(new Color(0, 0, 0, 0.3f));
+            _vertsColor.Add(new Color(0, 1, 1, 0.3f));
+            _vertsColor.Add(new Color(1, 1, 0, 0.3f));
+            _vertsColor.Add(new Color(0, 1, 0, 0.3f));
+
             _normals.Add(new Vector3(0, 1, 0));
             _normals.Add(new Vector3(0, 1, 0));
             _normals.Add(new Vector3(0, 1, 0));
@@ -249,6 +267,11 @@ namespace ProjectWisteria
             _verts.Add(new Vector3(x + 1, y, z + 1));
             _verts.Add(new Vector3(x + 1, y, z));
             _verts.Add(new Vector3(x, y, z));
+
+            _vertsColor.Add(new Color(1, 1, 1, 0.3f));
+            _vertsColor.Add(new Color(1, 1, 1, 0.3f));
+            _vertsColor.Add(new Color(1, 1, 1, 0.3f));
+            _vertsColor.Add(new Color(1, 1, 1, 0.3f));
 
             _normals.Add(new Vector3(0, -1, 0));
             _normals.Add(new Vector3(0, -1, 0));
@@ -273,6 +296,11 @@ namespace ProjectWisteria
             _verts.Add(new Vector3(x + 1, y, z + 1));
             _verts.Add(new Vector3(x, y, z + 1));
 
+            _vertsColor.Add(new Color(1, 1, 1, 0.3f));
+            _vertsColor.Add(new Color(1, 1, 1, 0.3f));
+            _vertsColor.Add(new Color(1, 1, 1, 0.3f));
+            _vertsColor.Add(new Color(1, 1, 1, 0.3f));
+
             _normals.Add(new Vector3(0, 0, 1));
             _normals.Add(new Vector3(0, 0, 1));
             _normals.Add(new Vector3(0, 0, 1));
@@ -295,6 +323,11 @@ namespace ProjectWisteria
             _verts.Add(new Vector3(x, y + 1, z));
             _verts.Add(new Vector3(x, y, z));
             _verts.Add(new Vector3(x + 1, y, z));
+
+            _vertsColor.Add(new Color(1, 1, 1, 0.3f));
+            _vertsColor.Add(new Color(1, 1, 1, 0.3f));
+            _vertsColor.Add(new Color(1, 1, 1, 0.3f));
+            _vertsColor.Add(new Color(1, 1, 1, 0.3f));
 
             _normals.Add(new Vector3(0, 0, -1));
             _normals.Add(new Vector3(0, 0, -1));
