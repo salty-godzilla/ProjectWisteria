@@ -2,13 +2,13 @@ using Godot;
 
 namespace ProjectWisteria
 {
-    public class PlayerMovement : KinematicBody
+    public class PlayerMovement : Spatial
     {
         private const float FloorMaxAngleDeg = 50;
 
-        private const float JumpForce = 6f;
-        private const float GravityForce = 9.8f;
-        private const float MoveForce = 10f;
+        private const float JumpForce = 0.2f;
+        private const float GravityForce = 0.5f;
+        private const float MoveSpeed = 10f;
         private const float Acceleration = 10f;
 
         private readonly float _mouseSensitivty = 0.2f;
@@ -20,10 +20,14 @@ namespace ProjectWisteria
 
         public Vector3 CharacterVelocity;
 
+        private EntityCollision _entityCollision;
+
         public override void _Ready()
         {
             _camera = GetNode<Camera>("./Camera");
             _camera.Current = true;
+
+            _entityCollision = GetNode<EntityCollision>("./CollisionDetecter");
 
             Input.SetMouseMode(Input.MouseMode.Captured);
             _isMouseCaptured = true;
@@ -66,7 +70,7 @@ namespace ProjectWisteria
             var targetHorizontalCharacterVelocity =
                 -GlobalTransform.basis.z * _inputVector.y + GlobalTransform.basis.x * _inputVector.x;
             targetHorizontalCharacterVelocity.Normalized();
-            targetHorizontalCharacterVelocity *= MoveForce;
+            targetHorizontalCharacterVelocity *= MoveSpeed * delta;
 
             if (jump)
             {
@@ -84,16 +88,20 @@ namespace ProjectWisteria
             CharacterVelocity.x = horizontalCharacterVelocity.x;
             CharacterVelocity.z = horizontalCharacterVelocity.z;
 
-            CharacterVelocity = MoveAndSlide(CharacterVelocity, Vector3.Up, true, 4, Mathf.Deg2Rad(FloorMaxAngleDeg),
-                false);
+            var y = _entityCollision.Move(CharacterVelocity.x, CharacterVelocity.y, CharacterVelocity.z);
 
-            UpdateTransform(Translation, Rotation);
-        }
+            if (Transform.origin.y.Equals(y))
+            {
+                CharacterVelocity.y = 0;
+            }
 
-        private void UpdateTransform(Vector3 position, Vector3 rotation)
-        {
-            Translation = position;
-            Rotation = rotation;
+            var pos = Transform;
+
+            pos.origin.x += CharacterVelocity.x;
+            pos.origin.y = y;
+            pos.origin.z += CharacterVelocity.z;
+
+            Transform = pos;
         }
 
         public override void _Input(InputEvent @event)

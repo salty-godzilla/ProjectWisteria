@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Godot;
 using ProjectWisteria.Coord;
@@ -82,6 +83,55 @@ namespace ProjectWisteria
 
                 ((MeshInstance) _sectionNodes[globalCoord].GetChild(0)).Mesh = mesh;
             }
+        }
+
+        public BlockType GetBlock(int x, int y, int z)
+        {
+            var chunkSectionX = x >> 4;
+            var chunkSectionY = y >> 4;
+            var chunkSectionZ = z >> 4;
+
+            var blockLocalPosX = (byte) (x & 0b1111);
+            var blockLocalPosY = (byte) (y & 0b1111);
+            var blockLocalPosZ = (byte) (z & 0b1111);
+
+            var chunk = _chunks[new ChunkCoord(chunkSectionX, chunkSectionZ)].GetChunkSection(chunkSectionY);
+
+            var block = chunk.GetBlock(blockLocalPosX, blockLocalPosY, blockLocalPosZ);
+            return block;
+        }
+
+        public List<AABB> GetAabb(AABB colliderAabb)
+        {
+            var aabbList = new List<AABB>();
+
+            var x0 = (int) Math.Floor(colliderAabb.Position.x);
+            var x1 = (int) Math.Floor(colliderAabb.End.x + 1);
+
+            var y0 = (int) Math.Floor(colliderAabb.Position.y);
+            var y1 = (int) Math.Floor(colliderAabb.End.y + 1);
+
+            var z0 = (int) Math.Floor(colliderAabb.Position.z);
+            var z1 = (int) Math.Floor(colliderAabb.End.z + 1);
+
+            //GD.Print($"{x0} {x1} / {y0} {y1} / {z0} {z1}");
+
+            for (var x = x0; x < x1; x++)
+            {
+                for (var y = y0; y < y1; y++)
+                {
+                    for (var z = z0; z < z1; z++)
+                    {
+                        if (GetBlock(x, y, z) != BlockType.Air)
+                        {
+                            var aabb = new AABB(x, y, z, 1, 1, 1);
+                            aabbList.Add(aabb);
+                        }
+                    }
+                }
+            }
+
+            return aabbList;
         }
     }
 }
