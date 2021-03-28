@@ -3,7 +3,7 @@
 [ext_resource path="res://scripts/World.cs" type="Script" id=1]
 [ext_resource path="res://prefabs/player.tscn" type="PackedScene" id=2]
 
-[sub_resource type="ProceduralSky" id=3]
+[sub_resource type="ProceduralSky" id=1]
 sky_top_color = Color( 0.211765, 0.313726, 0.552941, 1 )
 sky_horizon_color = Color( 0.545098, 0.686275, 0.811765, 1 )
 sky_curve = 0.13
@@ -15,7 +15,7 @@ sun_energy = 10.0
 
 [sub_resource type="Environment" id=2]
 background_mode = 2
-background_sky = SubResource( 3 )
+background_sky = SubResource( 1 )
 ambient_light_color = Color( 0.501961, 0.501961, 0.501961, 1 )
 ambient_light_energy = 3.0
 ambient_light_sky_contribution = 0.3
