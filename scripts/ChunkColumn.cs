@@ -4,7 +4,7 @@ namespace ProjectWisteria
 {
     public class ChunkColumn
     {
-        public readonly Chunk[] Sections = new Chunk[ChunkSections];
+        public readonly Chunk[] Sections = new Chunk[ChunksInColumn];
 
         public ChunkColumn()
         {
@@ -16,7 +16,7 @@ namespace ProjectWisteria
 
         public static int GetChunkSectionArrayIndex(int chunkSectionY)
         {
-            return (int) ChunkNegativeSections + chunkSectionY;
+            return ChunksNegativeInColumn + chunkSectionY;
         }
 
         public Chunk GetChunkSection(int chunkSectionY)

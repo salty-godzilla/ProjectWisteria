@@ -15,15 +15,15 @@ namespace ProjectWisteria
 
         public void Generate(Chunk section, ChunkSectionGlobalCoord coord)
         {
-            for (byte y = 0; y < ChunkSectionSize; y++)
+            for (var y = 0; y < ChunkSize; y++)
             {
-                for (byte z = 0; z < ChunkSectionSize; z++)
+                for (var z = 0; z < ChunkSize; z++)
                 {
-                    for (byte x = 0; x < ChunkSectionSize; x++)
+                    for (var x = 0; x < ChunkSize; x++)
                     {
-                        var blockGlobalX = coord.X * ChunkSectionSize + x;
-                        var blockGlobalY = coord.Y * ChunkSectionSize + y;
-                        var blockGlobalZ = coord.Z * ChunkSectionSize + z;
+                        var blockGlobalX = coord.X * ChunkSize + x;
+                        var blockGlobalY = coord.Y * ChunkSize + y;
+                        var blockGlobalZ = coord.Z * ChunkSize + z;
 
                         var height = (int) (_noise.GetNoise(blockGlobalX * 2f, blockGlobalZ * 2f) * 4
                                             + _noise.GetNoise(blockGlobalX, blockGlobalZ) * 4);

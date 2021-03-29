@@ -45,7 +45,7 @@ namespace ProjectWisteria
 
         public void Generate(out ArrayMesh? mesh, Chunk section)
         {
-            if (section.IsOnlyAirs())
+            if (section.IsOnlyAir())
             {
                 mesh = null;
                 return;
@@ -58,14 +58,14 @@ namespace ProjectWisteria
 
 
                 // Create X and Y faces
-                for (byte blockY = 0; blockY < ChunkSectionSize; blockY++)
+                for (var blockY = 0; blockY < ChunkSize; blockY++)
                 {
                     if (blockExistsY0ZAxisLines != null) { blockExistsYnZAxisLines = blockExistsY0ZAxisLines; }
                     else
                     {
-                        blockExistsYnZAxisLines = new BitArray[ChunkSectionSize + 2];
+                        blockExistsYnZAxisLines = new BitArray[ChunkSize + 2];
 
-                        for (var x = 0; x < ChunkSectionSize + 2; x++)
+                        for (var x = 0; x < ChunkSize + 2; x++)
                         {
                             blockExistsYnZAxisLines[x] = GetZAxisLineBlockExists(x - 1, blockY - 1, section);
                         }
@@ -74,22 +74,22 @@ namespace ProjectWisteria
                     if (blockExistsYpZAxisLines != null) { blockExistsY0ZAxisLines = blockExistsYpZAxisLines; }
                     else
                     {
-                        blockExistsY0ZAxisLines = new BitArray[ChunkSectionSize + 2];
+                        blockExistsY0ZAxisLines = new BitArray[ChunkSize + 2];
 
-                        for (var x = 0; x < ChunkSectionSize + 2; x++)
+                        for (var x = 0; x < ChunkSize + 2; x++)
                         {
                             blockExistsY0ZAxisLines[x] = GetZAxisLineBlockExists(x - 1, blockY, section);
                         }
                     }
 
-                    blockExistsYpZAxisLines = new BitArray[ChunkSectionSize + 2];
+                    blockExistsYpZAxisLines = new BitArray[ChunkSize + 2];
 
-                    for (var x = 0; x < ChunkSectionSize + 2; x++)
+                    for (var x = 0; x < ChunkSize + 2; x++)
                     {
                         blockExistsYpZAxisLines[x] = GetZAxisLineBlockExists(x - 1, blockY + 1, section);
                     }
 
-                    for (byte blockX = 0; blockX < ChunkSectionSize; blockX++)
+                    for (var blockX = 0; blockX < ChunkSize; blockX++)
                     {
                         CreateMergedFacesXy(section, blockX, blockY,
                             blockExistsYnZAxisLines, blockExistsY0ZAxisLines, blockExistsYpZAxisLines);
@@ -103,14 +103,14 @@ namespace ProjectWisteria
                 BitArray[]? blockExistsYpXAxisLines = null;
 
                 // Create Z faces
-                for (byte blockY = 0; blockY < ChunkSectionSize; blockY++)
+                for (var blockY = 0; blockY < ChunkSize; blockY++)
                 {
                     if (blockExistsY0XAxisLines != null) { blockExistsYnXAxisLines = blockExistsY0XAxisLines; }
                     else
                     {
-                        blockExistsYnXAxisLines = new BitArray[ChunkSectionSize + 2];
+                        blockExistsYnXAxisLines = new BitArray[ChunkSize + 2];
 
-                        for (var z = 0; z < ChunkSectionSize + 2; z++)
+                        for (var z = 0; z < ChunkSize + 2; z++)
                         {
                             blockExistsYnXAxisLines[z] = GetXAxisLineBlockExists(z - 1, blockY - 1, section);
                         }
@@ -119,22 +119,22 @@ namespace ProjectWisteria
                     if (blockExistsYpXAxisLines != null) { blockExistsY0XAxisLines = blockExistsYpXAxisLines; }
                     else
                     {
-                        blockExistsY0XAxisLines = new BitArray[ChunkSectionSize + 2];
+                        blockExistsY0XAxisLines = new BitArray[ChunkSize + 2];
 
-                        for (var z = 0; z < ChunkSectionSize + 2; z++)
+                        for (var z = 0; z < ChunkSize + 2; z++)
                         {
                             blockExistsY0XAxisLines[z] = GetXAxisLineBlockExists(z - 1, blockY, section);
                         }
                     }
 
-                    blockExistsYpXAxisLines = new BitArray[ChunkSectionSize + 2];
+                    blockExistsYpXAxisLines = new BitArray[ChunkSize + 2];
 
-                    for (var z = 0; z < ChunkSectionSize + 2; z++)
+                    for (var z = 0; z < ChunkSize + 2; z++)
                     {
                         blockExistsYpXAxisLines[z] = GetXAxisLineBlockExists(z - 1, blockY + 1, section);
                     }
 
-                    for (byte blockZ = 0; blockZ < ChunkSectionSize; blockZ++)
+                    for (var blockZ = 0; blockZ < ChunkSize; blockZ++)
                     {
                         CreateMergedFaceZ(section, blockY, blockZ,
                             blockExistsYnXAxisLines, blockExistsY0XAxisLines, blockExistsYpXAxisLines);
@@ -166,7 +166,7 @@ namespace ProjectWisteria
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void CreateMergedFacesXy(Chunk section, byte startX, byte startY,
+        private void CreateMergedFacesXy(Chunk section, int startX, int startY,
             IReadOnlyList<BitArray> blockYnZAxisLines,
             IReadOnlyList<BitArray> blockY0ZAxisLines,
             IReadOnlyList<BitArray> blockYpZAxisLines)
@@ -184,7 +184,7 @@ namespace ProjectWisteria
             byte[] ynFaceStartAoLevels = null!;
 
             // Z-axis scanning
-            for (var z = 0; z < ChunkSectionSize; z++)
+            for (var z = 0; z < ChunkSize; z++)
             {
                 var block = section.GetBlock(startX, startY, z);
 
@@ -375,31 +375,31 @@ namespace ProjectWisteria
             if (xpFaceStartZ != -1)
             {
                 AddXpBlockFaceElems(startX, startY, xpFaceStartZ,
-                    (int) ChunkSectionSize - xpFaceStartZ, startBlock, xpFaceStartAoLevels);
+                    ChunkSize - xpFaceStartZ, startBlock, xpFaceStartAoLevels);
             }
 
             if (xnFaceStartZ != -1)
             {
                 AddXnBlockFaceElems(startX, startY, xnFaceStartZ,
-                    (int) ChunkSectionSize - xnFaceStartZ, startBlock, xnFaceStartAoLevels);
+                    ChunkSize - xnFaceStartZ, startBlock, xnFaceStartAoLevels);
             }
 
             if (ypFaceStartZ != -1)
             {
                 AddYpBlockFaceElems(startX, startY, ypFaceStartZ,
-                    (int) ChunkSectionSize - ypFaceStartZ, startBlock, ypFaceStartAoLevels);
+                    ChunkSize - ypFaceStartZ, startBlock, ypFaceStartAoLevels);
             }
 
             if (ynFaceStartZ != -1)
             {
                 AddYnBlockFaceElems(startX, startY, ynFaceStartZ,
-                    (int) ChunkSectionSize - ynFaceStartZ, startBlock, ynFaceStartAoLevels);
+                    ChunkSize - ynFaceStartZ, startBlock, ynFaceStartAoLevels);
             }
         }
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void CreateMergedFaceZ(Chunk section, byte startY, byte startZ,
+        private void CreateMergedFaceZ(Chunk section, int startY, int startZ,
             IReadOnlyList<BitArray> blockYnXAxisLines,
             IReadOnlyList<BitArray> blockY0XAxisLines,
             IReadOnlyList<BitArray> blockYpXAxisLines)
@@ -413,7 +413,7 @@ namespace ProjectWisteria
             byte[] znFaceStartAoLevels = null!;
 
             // X-axis scanning
-            for (var x = 0; x < ChunkSectionSize; x++)
+            for (var x = 0; x < ChunkSize; x++)
             {
                 var block = section.GetBlock(x, startY, startZ);
 
@@ -519,22 +519,22 @@ namespace ProjectWisteria
             if (zpFaceStartX != -1)
             {
                 AddZpBlockFaceElems(zpFaceStartX, startY, startZ,
-                    (int) ChunkSectionSize - zpFaceStartX, startBlock, zpFaceStartAoLevels);
+                    ChunkSize - zpFaceStartX, startBlock, zpFaceStartAoLevels);
             }
 
             if (znFaceStartX != -1)
             {
                 AddZnBlockFaceElems(znFaceStartX, startY, startZ,
-                    (int) ChunkSectionSize - znFaceStartX, startBlock, znFaceStartAoLevels);
+                    ChunkSize - znFaceStartX, startBlock, znFaceStartAoLevels);
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsXpFaceVisible(int x, int y, int z, Chunk section)
         {
-            if (x < ChunkSectionSize - 1)
+            if (x < ChunkSize - 1)
             {
-                return section.GetBlock((byte) (x + 1), y, z) == BlockType.Air;
+                return section.GetBlock(x + 1, y, z) == BlockType.Air;
             }
 
             if (section.XpNeighbor == null) { return true; }
@@ -547,20 +547,20 @@ namespace ProjectWisteria
         {
             if (x > 0)
             {
-                return section.GetBlock((byte) (x - 1), y, z) == BlockType.Air;
+                return section.GetBlock(x - 1, y, z) == BlockType.Air;
             }
 
             if (section.XnNeighbor == null) { return true; }
 
-            return section.XnNeighbor.GetBlock((byte) (ChunkSectionSize - 1), y, z) == BlockType.Air;
+            return section.XnNeighbor.GetBlock(ChunkSize - 1, y, z) == BlockType.Air;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsZpFaceVisible(int x, int y, int z, Chunk section)
         {
-            if (z < ChunkSectionSize - 1)
+            if (z < ChunkSize - 1)
             {
-                return section.GetBlock(x, y, (byte) (z + 1)) == BlockType.Air;
+                return section.GetBlock(x, y, z + 1) == BlockType.Air;
             }
 
             if (section.ZpNeighbor == null) { return true; }
@@ -573,20 +573,20 @@ namespace ProjectWisteria
         {
             if (z > 0)
             {
-                return section.GetBlock(x, y, (byte) (z - 1)) == BlockType.Air;
+                return section.GetBlock(x, y, z - 1) == BlockType.Air;
             }
 
             if (section.ZnNeighbor == null) { return true; }
 
-            return section.ZnNeighbor.GetBlock(x, y, (byte) (ChunkSectionSize - 1)) == BlockType.Air;
+            return section.ZnNeighbor.GetBlock(x, y, ChunkSize - 1) == BlockType.Air;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsYpFaceVisible(int x, int y, int z, Chunk section)
         {
-            if (y < ChunkSectionSize - 1)
+            if (y < ChunkSize - 1)
             {
-                return section.GetBlock(x, (byte) (y + 1), z) == BlockType.Air;
+                return section.GetBlock(x, y + 1, z) == BlockType.Air;
             }
 
             if (section.YpNeighbor == null) { return true; }
@@ -599,12 +599,12 @@ namespace ProjectWisteria
         {
             if (y > 0)
             {
-                return section.GetBlock(x, (byte) (y - 1), z) == BlockType.Air;
+                return section.GetBlock(x, y - 1, z) == BlockType.Air;
             }
 
             if (section.YnNeighbor == null) { return true; }
 
-            return section.YnNeighbor.GetBlock(x, (byte) (ChunkSectionSize - 1), z) == BlockType.Air;
+            return section.YnNeighbor.GetBlock(x, ChunkSize - 1, z) == BlockType.Air;
         }
 
         private void AddXpBlockFaceElems(int x, int y, int z, int len, BlockType block, IReadOnlyList<byte> aoLevels)
@@ -849,11 +849,11 @@ namespace ProjectWisteria
 
         public static BitArray GetZAxisLineBlockExists(int blockX, int blockY, Chunk section)
         {
-            var results = new BitArray((int) ChunkSectionSize + 2, false);
+            var results = new BitArray(ChunkSize + 2, false);
 
             if (!Chunk.IsValidBlockPos(blockX, blockY, 0)) { return results; }
 
-            for (var z = 0; z < ChunkSectionSize; z++)
+            for (var z = 0; z < ChunkSize; z++)
             {
                 results[z + 1] = section.GetBlock(blockX, blockY, z) != BlockType.Air;
             }
@@ -863,11 +863,11 @@ namespace ProjectWisteria
 
         public static BitArray GetXAxisLineBlockExists(int blockZ, int blockY, Chunk section)
         {
-            var results = new BitArray((int) ChunkSectionSize + 2, false);
+            var results = new BitArray(ChunkSize + 2, false);
 
             if (!Chunk.IsValidBlockPos(0, blockY, blockZ)) { return results; }
 
-            for (var x = 0; x < ChunkSectionSize; x++)
+            for (var x = 0; x < ChunkSize; x++)
             {
                 results[x + 1] = section.GetBlock(x, blockY, blockZ) != BlockType.Air;
             }

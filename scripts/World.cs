@@ -24,14 +24,14 @@ namespace ProjectWisteria
 
             _chunkSectionMeshGenerator = new ChunkSectionMeshGenerator();
 
-            for (var chunkX = -(int) WorldSizeX / 2; chunkX <= (WorldSizeX - 1) / 2; chunkX++)
+            for (var chunkX = -WorldSizeX / 2; chunkX <= (WorldSizeX - 1) / 2; chunkX++)
             {
-                for (var chunkZ = -(int) WorldSizeZ / 2; chunkZ <= (WorldSizeZ - 1) / 2; chunkZ++)
+                for (var chunkZ = -WorldSizeZ / 2; chunkZ <= (WorldSizeZ - 1) / 2; chunkZ++)
                 {
                     var chunk = new ChunkColumn();
 
-                    for (var chunkSectionY = -(int) ChunkNegativeSections;
-                        chunkSectionY < ChunkPositiveSections;
+                    for (var chunkSectionY = -ChunksNegativeInColumn;
+                        chunkSectionY < ChunksPositiveInColumn;
                         chunkSectionY++)
                     {
                         var chunkSectionGlobalCoord = new ChunkSectionGlobalCoord(chunkX, chunkSectionY, chunkZ);
@@ -42,9 +42,9 @@ namespace ProjectWisteria
                         var chunkSectionNode = new Spatial
                         {
                             Translation = new Vector3(
-                                chunkX * ChunkSectionSize,
-                                chunkSectionY * ChunkSectionSize,
-                                chunkZ * ChunkSectionSize
+                                chunkX * ChunkSize,
+                                chunkSectionY * ChunkSize,
+                                chunkZ * ChunkSize
                             ),
                             Name = $"Chunk ({chunkX}, {chunkZ}) [{chunkSectionY}]"
                         };
@@ -89,9 +89,9 @@ namespace ProjectWisteria
             var chunkSectionY = y >> 4;
             var chunkSectionZ = z >> 4;
 
-            var blockLocalPosX = (byte) (x & 0b1111);
-            var blockLocalPosY = (byte) (y & 0b1111);
-            var blockLocalPosZ = (byte) (z & 0b1111);
+            var blockLocalPosX = x & 0b1111;
+            var blockLocalPosY = y & 0b1111;
+            var blockLocalPosZ = z & 0b1111;
 
             var chunk = _chunks[new ChunkCoord(chunkSectionX, chunkSectionZ)].GetChunkSection(chunkSectionY);
 

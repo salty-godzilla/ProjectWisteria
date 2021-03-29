@@ -1,26 +1,29 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
 using static ProjectWisteria.WorldConstants;
 
 namespace ProjectWisteria
 {
     public class Chunk
     {
-        private readonly BlockType[] _blocks = new BlockType[ChunkSectionSizeCubed];
+        private readonly BlockType[] _blocks = new BlockType[ChunkSizeCubed];
 
-        public ushort BlockCount { get; set; }
+        public int BlockCount { get; private set; }
 
         public Chunk? XpNeighbor, XnNeighbor;
         public Chunk? YpNeighbor, YnNeighbor;
         public Chunk? ZpNeighbor, ZnNeighbor;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ushort GetBlockArrayIndex(byte x, byte y, byte z)
+        public static int GetBlockArrayIndex(int x, int y, int z)
         {
-            return (ushort) ((y * ChunkSectionSize + z) * ChunkSectionSize + x);
+            if (!IsValidBlockPos(x, y, z)) { throw new ArgumentOutOfRangeException(); }
+
+            return (y * ChunkSize + z) * ChunkSize + x;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetBlock(byte x, byte y, byte z, BlockType blockType)
+        public void SetBlock(int x, int y, int z, BlockType blockType)
         {
             var blockArrayPos = GetBlockArrayIndex(x, y, z);
             var beforeBlockType = _blocks[blockArrayPos];
@@ -40,34 +43,28 @@ namespace ProjectWisteria
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public BlockType GetBlock(byte x, byte y, byte z)
+        public BlockType GetBlock(int x, int y, int z)
         {
             return _blocks[GetBlockArrayIndex(x, y, z)];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public BlockType GetBlock(ushort blockArrayIndex)
+        public BlockType GetBlock(int blockArrayIndex)
         {
             return _blocks[blockArrayIndex];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public BlockType GetBlock(int x, int y, int z)
-        {
-            return _blocks[GetBlockArrayIndex((byte) x, (byte) y, (byte) z)];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool IsOnlyAirs()
+        public bool IsOnlyAir()
         {
             return BlockCount == 0;
         }
 
         public static bool IsValidBlockPos(int x, int y, int z)
         {
-            var invalid = x < 0 || x >= ChunkSectionSize
-                                || y < 0 || y >= ChunkSectionSize
-                                || z < 0 || z >= ChunkSectionSize;
+            var invalid = x < 0 || x >= ChunkSize
+                                || y < 0 || y >= ChunkSize
+                                || z < 0 || z >= ChunkSize;
 
             return !invalid;
         }
