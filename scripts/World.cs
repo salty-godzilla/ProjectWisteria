@@ -10,7 +10,7 @@ namespace ProjectWisteria
     // ReSharper disable once UnusedType.Global
     public class World : Node
     {
-        private readonly Dictionary<ChunkCoord, Chunk> _chunks = new();
+        private readonly Dictionary<ChunkCoord, ChunkColumn> _chunks = new();
         private readonly Dictionary<ChunkSectionGlobalCoord, Node> _sectionNodes = new();
 
         private readonly Queue<ChunkSectionGlobalCoord> _needRenderUpdateChunkSections = new();
@@ -28,7 +28,7 @@ namespace ProjectWisteria
             {
                 for (var chunkZ = -(int) WorldSizeZ / 2; chunkZ <= (WorldSizeZ - 1) / 2; chunkZ++)
                 {
-                    var chunk = new Chunk();
+                    var chunk = new ChunkColumn();
 
                     for (var chunkSectionY = -(int) ChunkNegativeSections;
                         chunkSectionY < ChunkPositiveSections;
@@ -36,7 +36,7 @@ namespace ProjectWisteria
                     {
                         var chunkSectionGlobalCoord = new ChunkSectionGlobalCoord(chunkX, chunkSectionY, chunkZ);
 
-                        _terrainGenerator.Generate(chunk.Sections[Chunk.GetChunkSectionArrayIndex(chunkSectionY)],
+                        _terrainGenerator.Generate(chunk.Sections[ChunkColumn.GetChunkSectionArrayIndex(chunkSectionY)],
                             chunkSectionGlobalCoord);
 
                         var chunkSectionNode = new Spatial

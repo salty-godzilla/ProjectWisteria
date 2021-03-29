@@ -2,11 +2,11 @@ using static ProjectWisteria.WorldConstants;
 
 namespace ProjectWisteria
 {
-    public class Chunk
+    public class ChunkColumn
     {
         public readonly ChunkSection[] Sections = new ChunkSection[ChunkSections];
 
-        public Chunk()
+        public ChunkColumn()
         {
             for (var i = 0; i < Sections.Length; i++)
             {
