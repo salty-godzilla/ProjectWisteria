@@ -13,7 +13,7 @@ namespace ProjectWisteria
             _noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
         }
 
-        public void Generate(ChunkSection section, ChunkSectionGlobalCoord coord)
+        public void Generate(Chunk section, ChunkSectionGlobalCoord coord)
         {
             for (byte y = 0; y < ChunkSectionSize; y++)
             {

@@ -43,7 +43,7 @@ namespace ProjectWisteria
             _material.SetShaderParam("texture_albedo", BlockDictionary.Instance.TextureArray);
         }
 
-        public void Generate(out ArrayMesh? mesh, ChunkSection section)
+        public void Generate(out ArrayMesh? mesh, Chunk section)
         {
             if (section.IsOnlyAirs())
             {
@@ -166,7 +166,7 @@ namespace ProjectWisteria
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void CreateMergedFacesXy(ChunkSection section, byte startX, byte startY,
+        private void CreateMergedFacesXy(Chunk section, byte startX, byte startY,
             IReadOnlyList<BitArray> blockYnZAxisLines,
             IReadOnlyList<BitArray> blockY0ZAxisLines,
             IReadOnlyList<BitArray> blockYpZAxisLines)
@@ -399,7 +399,7 @@ namespace ProjectWisteria
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void CreateMergedFaceZ(ChunkSection section, byte startY, byte startZ,
+        private void CreateMergedFaceZ(Chunk section, byte startY, byte startZ,
             IReadOnlyList<BitArray> blockYnXAxisLines,
             IReadOnlyList<BitArray> blockY0XAxisLines,
             IReadOnlyList<BitArray> blockYpXAxisLines)
@@ -530,7 +530,7 @@ namespace ProjectWisteria
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsXpFaceVisible(int x, int y, int z, ChunkSection section)
+        private static bool IsXpFaceVisible(int x, int y, int z, Chunk section)
         {
             if (x < ChunkSectionSize - 1)
             {
@@ -543,7 +543,7 @@ namespace ProjectWisteria
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsXnFaceVisible(int x, int y, int z, ChunkSection section)
+        private static bool IsXnFaceVisible(int x, int y, int z, Chunk section)
         {
             if (x > 0)
             {
@@ -556,7 +556,7 @@ namespace ProjectWisteria
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsZpFaceVisible(int x, int y, int z, ChunkSection section)
+        private static bool IsZpFaceVisible(int x, int y, int z, Chunk section)
         {
             if (z < ChunkSectionSize - 1)
             {
@@ -569,7 +569,7 @@ namespace ProjectWisteria
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsZnFaceVisible(int x, int y, int z, ChunkSection section)
+        private static bool IsZnFaceVisible(int x, int y, int z, Chunk section)
         {
             if (z > 0)
             {
@@ -582,7 +582,7 @@ namespace ProjectWisteria
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsYpFaceVisible(int x, int y, int z, ChunkSection section)
+        private static bool IsYpFaceVisible(int x, int y, int z, Chunk section)
         {
             if (y < ChunkSectionSize - 1)
             {
@@ -595,7 +595,7 @@ namespace ProjectWisteria
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsYnFaceVisible(int x, int y, int z, ChunkSection section)
+        private static bool IsYnFaceVisible(int x, int y, int z, Chunk section)
         {
             if (y > 0)
             {
@@ -847,11 +847,11 @@ namespace ProjectWisteria
             }
         }
 
-        public static BitArray GetZAxisLineBlockExists(int blockX, int blockY, ChunkSection section)
+        public static BitArray GetZAxisLineBlockExists(int blockX, int blockY, Chunk section)
         {
             var results = new BitArray((int) ChunkSectionSize + 2, false);
 
-            if (!ChunkSection.IsValidBlockPos(blockX, blockY, 0)) { return results; }
+            if (!Chunk.IsValidBlockPos(blockX, blockY, 0)) { return results; }
 
             for (var z = 0; z < ChunkSectionSize; z++)
             {
@@ -861,11 +861,11 @@ namespace ProjectWisteria
             return results;
         }
 
-        public static BitArray GetXAxisLineBlockExists(int blockZ, int blockY, ChunkSection section)
+        public static BitArray GetXAxisLineBlockExists(int blockZ, int blockY, Chunk section)
         {
             var results = new BitArray((int) ChunkSectionSize + 2, false);
 
-            if (!ChunkSection.IsValidBlockPos(0, blockY, blockZ)) { return results; }
+            if (!Chunk.IsValidBlockPos(0, blockY, blockZ)) { return results; }
 
             for (var x = 0; x < ChunkSectionSize; x++)
             {

@@ -46,7 +46,7 @@ namespace ProjectWisteria
                                 chunkSectionY * ChunkSectionSize,
                                 chunkZ * ChunkSectionSize
                             ),
-                            Name = $"ChunkSection ({chunkX}, {chunkZ}) [{chunkSectionY}]"
+                            Name = $"Chunk ({chunkX}, {chunkZ}) [{chunkSectionY}]"
                         };
 
                         AddChild(chunkSectionNode);

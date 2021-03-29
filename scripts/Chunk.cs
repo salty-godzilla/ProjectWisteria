@@ -3,15 +3,15 @@ using static ProjectWisteria.WorldConstants;
 
 namespace ProjectWisteria
 {
-    public class ChunkSection
+    public class Chunk
     {
         private readonly BlockType[] _blocks = new BlockType[ChunkSectionSizeCubed];
 
         public ushort BlockCount { get; set; }
 
-        public ChunkSection? XpNeighbor, XnNeighbor;
-        public ChunkSection? YpNeighbor, YnNeighbor;
-        public ChunkSection? ZpNeighbor, ZnNeighbor;
+        public Chunk? XpNeighbor, XnNeighbor;
+        public Chunk? YpNeighbor, YnNeighbor;
+        public Chunk? ZpNeighbor, ZnNeighbor;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ushort GetBlockArrayIndex(byte x, byte y, byte z)

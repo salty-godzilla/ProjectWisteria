@@ -4,13 +4,13 @@ namespace ProjectWisteria
 {
     public class ChunkColumn
     {
-        public readonly ChunkSection[] Sections = new ChunkSection[ChunkSections];
+        public readonly Chunk[] Sections = new Chunk[ChunkSections];
 
         public ChunkColumn()
         {
             for (var i = 0; i < Sections.Length; i++)
             {
-                Sections[i] = new ChunkSection();
+                Sections[i] = new Chunk();
             }
         }
 
@@ -19,7 +19,7 @@ namespace ProjectWisteria
             return (int) ChunkNegativeSections + chunkSectionY;
         }
 
-        public ChunkSection GetChunkSection(int chunkSectionY)
+        public Chunk GetChunkSection(int chunkSectionY)
         {
             return Sections[GetChunkSectionArrayIndex(chunkSectionY)];
         }
