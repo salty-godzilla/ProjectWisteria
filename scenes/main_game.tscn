@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://scripts/World.cs" type="Script" id=1]
 [ext_resource path="res://prefabs/player.tscn" type="PackedScene" id=2]
+[ext_resource path="res://scripts/DebugDraw.cs" type="Script" id=3]
 
 [sub_resource type="ProceduralSky" id=1]
 sky_top_color = Color( 0.211765, 0.313726, 0.552941, 1 )
@@ -40,3 +41,8 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 20, 0 )
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource( 2 )
+
+[node name="Scripts" type="Node" parent="."]
+
+[node name="DebugDraw" type="Node" parent="Scripts"]
+script = ExtResource( 3 )
