@@ -51,11 +51,25 @@ namespace ProjectWisteria
             return _blocks[blockArrayIndex];
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public BlockType GetBlock(int x, int y, int z)
+        {
+            return _blocks[GetBlockArrayIndex((byte) x, (byte) y, (byte) z)];
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsOnlyAirs()
         {
             return BlockCount == 0;
+        }
+
+        public static bool IsValidBlockPos(int x, int y, int z)
+        {
+            var invalid = x < 0 || x >= ChunkSectionSize
+                                || y < 0 || y >= ChunkSectionSize
+                                || z < 0 || z >= ChunkSectionSize;
+
+            return !invalid;
         }
     }
 }
