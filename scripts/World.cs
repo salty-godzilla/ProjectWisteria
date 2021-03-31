@@ -13,7 +13,7 @@ namespace ProjectWisteria
         private readonly Dictionary<ChunkColumnCoord, ChunkColumn> _chunkCols = new();
         private readonly Dictionary<ChunkGlobalCoord, Node> _chunkNodes = new();
 
-        private readonly Queue<ChunkGlobalCoord> _needRenderUpdateChunkSections = new();
+        private readonly Queue<ChunkGlobalCoord> _needRenderUpdateChunks = new();
 
         private TerrainGenerator _terrainGenerator = null!;
         private ChunkMeshGenerator _chunkMeshGenerator = null!;
@@ -57,7 +57,7 @@ namespace ProjectWisteria
                         chunkNode.AddChild(chunkMeshNode);
 
                         _chunkNodes[chunkGlobalCoord] = chunkNode;
-                        _needRenderUpdateChunkSections.Enqueue(chunkGlobalCoord);
+                        _needRenderUpdateChunks.Enqueue(chunkGlobalCoord);
                     }
 
                     var chunkCoord = new ChunkColumnCoord(chunkColX, chunkColZ);
@@ -68,9 +68,9 @@ namespace ProjectWisteria
 
         public override void _Process(float delta)
         {
-            if (_needRenderUpdateChunkSections.Count > 0)
+            if (_needRenderUpdateChunks.Count > 0)
             {
-                var globalCoord = _needRenderUpdateChunkSections.Dequeue();
+                var globalCoord = _needRenderUpdateChunks.Dequeue();
                 var chunkCoord = new ChunkColumnCoord(globalCoord.X, globalCoord.Z);
 
                 var chunkCol = _chunkCols[chunkCoord];

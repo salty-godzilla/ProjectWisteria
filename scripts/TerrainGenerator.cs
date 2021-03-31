@@ -13,7 +13,7 @@ namespace ProjectWisteria
             _noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
         }
 
-        public void Generate(Chunk section, ChunkGlobalCoord coord)
+        public void Generate(Chunk chunk, ChunkGlobalCoord coord)
         {
             for (var y = 0; y < ChunkSize; y++)
             {
@@ -30,11 +30,11 @@ namespace ProjectWisteria
 
                         if (height == blockGlobalY)
                         {
-                            section.SetBlock(x, y, z, BlockType.Grass);
+                            chunk.SetBlock(x, y, z, BlockType.Grass);
                         }
                         else if (height > blockGlobalY)
                         {
-                            section.SetBlock(x, y, z, BlockType.Dirt);
+                            chunk.SetBlock(x, y, z, BlockType.Dirt);
                         }
                     }
                 }
