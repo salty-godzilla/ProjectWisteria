@@ -10,59 +10,58 @@ namespace ProjectWisteria
     // ReSharper disable once UnusedType.Global
     public class World : Node
     {
-        private readonly Dictionary<ChunkCoord, ChunkColumn> _chunks = new();
-        private readonly Dictionary<ChunkSectionGlobalCoord, Node> _sectionNodes = new();
+        private readonly Dictionary<ChunkColumnCoord, ChunkColumn> _chunkCols = new();
+        private readonly Dictionary<ChunkGlobalCoord, Node> _chunkNodes = new();
 
-        private readonly Queue<ChunkSectionGlobalCoord> _needRenderUpdateChunkSections = new();
+        private readonly Queue<ChunkGlobalCoord> _needRenderUpdateChunkSections = new();
 
         private TerrainGenerator _terrainGenerator = null!;
-        private ChunkSectionMeshGenerator _chunkSectionMeshGenerator = null!;
+        private ChunkMeshGenerator _chunkMeshGenerator = null!;
 
         public override void _Ready()
         {
             _terrainGenerator = new TerrainGenerator();
 
-            _chunkSectionMeshGenerator = new ChunkSectionMeshGenerator();
+            _chunkMeshGenerator = new ChunkMeshGenerator();
 
-            for (var chunkX = -WorldSizeX / 2; chunkX <= (WorldSizeX - 1) / 2; chunkX++)
+            for (var chunkColX = -WorldSizeX / 2; chunkColX <= (WorldSizeX - 1) / 2; chunkColX++)
             {
-                for (var chunkZ = -WorldSizeZ / 2; chunkZ <= (WorldSizeZ - 1) / 2; chunkZ++)
+                for (var chunkColZ = -WorldSizeZ / 2; chunkColZ <= (WorldSizeZ - 1) / 2; chunkColZ++)
                 {
-                    var chunk = new ChunkColumn();
+                    var chunkCol = new ChunkColumn(this, chunkColX, chunkColZ);
 
-                    for (var chunkSectionY = -ChunksNegativeInColumn;
-                        chunkSectionY < ChunksPositiveInColumn;
-                        chunkSectionY++)
+                    for (var chunkY = -ChunksNegativeInColumn; chunkY < ChunksPositiveInColumn; chunkY++)
                     {
-                        var chunkSectionGlobalCoord = new ChunkSectionGlobalCoord(chunkX, chunkSectionY, chunkZ);
+                        var chunkGlobalCoord = new ChunkGlobalCoord(chunkColX, chunkY, chunkColZ);
 
-                        _terrainGenerator.Generate(chunk.Sections[ChunkColumn.GetChunkSectionArrayIndex(chunkSectionY)],
-                            chunkSectionGlobalCoord);
+                        var chunk = chunkCol.GetChunk(chunkY)!;
 
-                        var chunkSectionNode = new Spatial
+                        _terrainGenerator.Generate(chunk, chunkGlobalCoord);
+
+                        var chunkNode = new Spatial
                         {
                             Translation = new Vector3(
-                                chunkX * ChunkSize,
-                                chunkSectionY * ChunkSize,
-                                chunkZ * ChunkSize
+                                chunkColX * ChunkSize,
+                                chunkY * ChunkSize,
+                                chunkColZ * ChunkSize
                             ),
-                            Name = $"Chunk ({chunkX}, {chunkZ}) [{chunkSectionY}]"
+                            Name = $"Chunk ({chunkColX}, {chunkColZ}) [{chunkY}]"
                         };
 
-                        AddChild(chunkSectionNode);
+                        AddChild(chunkNode);
 
-                        var chunkSectionMeshNode = new MeshInstance
+                        var chunkMeshNode = new MeshInstance
                         {
                             Name = "BlockMesh"
                         };
-                        chunkSectionNode.AddChild(chunkSectionMeshNode);
+                        chunkNode.AddChild(chunkMeshNode);
 
-                        _sectionNodes[chunkSectionGlobalCoord] = chunkSectionNode;
-                        _needRenderUpdateChunkSections.Enqueue(chunkSectionGlobalCoord);
+                        _chunkNodes[chunkGlobalCoord] = chunkNode;
+                        _needRenderUpdateChunkSections.Enqueue(chunkGlobalCoord);
                     }
 
-                    var chunkCoord = new ChunkCoord(chunkX, chunkZ);
-                    _chunks.Add(chunkCoord, chunk);
+                    var chunkCoord = new ChunkColumnCoord(chunkColX, chunkColZ);
+                    _chunkCols.Add(chunkCoord, chunkCol);
                 }
             }
         }
@@ -72,30 +71,45 @@ namespace ProjectWisteria
             if (_needRenderUpdateChunkSections.Count > 0)
             {
                 var globalCoord = _needRenderUpdateChunkSections.Dequeue();
-                var chunkCoord = new ChunkCoord(globalCoord.X, globalCoord.Z);
+                var chunkCoord = new ChunkColumnCoord(globalCoord.X, globalCoord.Z);
 
-                var chunk = _chunks[chunkCoord];
-                var chunkSection = chunk.GetChunkSection(globalCoord.Y);
+                var chunkCol = _chunkCols[chunkCoord];
+                var chunk = chunkCol.GetChunk(globalCoord.Y)!;
 
-                _chunkSectionMeshGenerator.Generate(out var mesh, chunkSection);
+                _chunkMeshGenerator.Generate(out var mesh, chunk);
 
-                ((MeshInstance) _sectionNodes[globalCoord].GetChild(0)).Mesh = mesh;
+                ((MeshInstance) _chunkNodes[globalCoord].GetChild(0)).Mesh = mesh;
             }
+        }
+
+        public ChunkColumn? GetChunkColumn(int x, int z)
+        {
+            _chunkCols.TryGetValue(new ChunkColumnCoord(x, z), out var chunkCol);
+
+            return chunkCol;
+        }
+
+        public Chunk? GetChunk(int x, int y, int z)
+        {
+            var chunkCol = GetChunkColumn(x, z);
+
+            return chunkCol?.GetChunk(y);
         }
 
         public BlockType GetBlock(int x, int y, int z)
         {
-            var chunkSectionX = x >> 4;
-            var chunkSectionY = y >> 4;
-            var chunkSectionZ = z >> 4;
+            var chunkColX = x >> 4;
+            var chunkColZ = z >> 4;
 
-            var blockLocalPosX = x & 0b1111;
-            var blockLocalPosY = y & 0b1111;
-            var blockLocalPosZ = z & 0b1111;
+            var chunkY = y >> 4;
 
-            var chunk = _chunks[new ChunkCoord(chunkSectionX, chunkSectionZ)].GetChunkSection(chunkSectionY);
+            var blockX = x & 0b1111;
+            var blockY = y & 0b1111;
+            var blockZ = z & 0b1111;
 
-            var block = chunk.GetBlock(blockLocalPosX, blockLocalPosY, blockLocalPosZ);
+            var chunk = GetChunkColumn(chunkColX, chunkColZ)!.GetChunk(chunkY);
+
+            var block = chunk.GetBlock(blockX, blockY, blockZ)!;
             return block;
         }
 

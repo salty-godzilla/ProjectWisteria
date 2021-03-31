@@ -2,35 +2,35 @@
 {
     namespace Coord
     {
-        public struct ChunkCoord
+        public struct ChunkColumnCoord
         {
             public int X { get; set; }
             public int Z { get; set; }
 
-            public ChunkCoord(int x, int z)
+            public ChunkColumnCoord(int x, int z)
             {
                 X = x;
                 Z = z;
             }
         }
 
-        public struct ChunkSectionCoord
+        public struct ChunkCoord
         {
             public int Y { get; set; }
 
-            public ChunkSectionCoord(int y)
+            public ChunkCoord(int y)
             {
                 Y = y;
             }
         }
 
-        public struct ChunkSectionGlobalCoord
+        public struct ChunkGlobalCoord
         {
             public int X { get; set; }
             public int Y { get; set; }
             public int Z { get; set; }
 
-            public ChunkSectionGlobalCoord(int x, int y, int z)
+            public ChunkGlobalCoord(int x, int y, int z)
             {
                 X = x;
                 Y = y;

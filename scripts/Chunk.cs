@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.CompilerServices;
 using static ProjectWisteria.WorldConstants;
 
@@ -6,13 +6,24 @@ namespace ProjectWisteria
 {
     public class Chunk
     {
+        public World World { get; }
+
+        public int ChunkColumnX { get; }
+        public int ChunkColumnZ { get; }
+        public int ChunkY { get; }
+
         private readonly BlockType[] _blocks = new BlockType[ChunkSizeCubed];
 
         public int BlockCount { get; private set; }
 
-        public Chunk? XpNeighbor, XnNeighbor;
-        public Chunk? YpNeighbor, YnNeighbor;
-        public Chunk? ZpNeighbor, ZnNeighbor;
+        public Chunk(World world, int chunkColumnX, int chunkColumnZ, int chunkY)
+        {
+            World = world;
+
+            ChunkColumnX = chunkColumnX;
+            ChunkColumnZ = chunkColumnZ;
+            ChunkY = chunkY;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetBlockArrayIndex(int x, int y, int z)

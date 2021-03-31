@@ -1,27 +1,49 @@
+using System;
 using static ProjectWisteria.WorldConstants;
 
 namespace ProjectWisteria
 {
     public class ChunkColumn
     {
-        public readonly Chunk[] Sections = new Chunk[ChunksInColumn];
+        private readonly World _world;
 
-        public ChunkColumn()
+        public int ChunkColumnX { get; }
+        public int ChunkColumnZ { get; }
+
+        private readonly Chunk[] _chunks = new Chunk[ChunksInColumn];
+
+        public ChunkColumn(World world, int chunkColumnX, int chunkColumnZ)
         {
-            for (var i = 0; i < Sections.Length; i++)
+            _world = world;
+
+            ChunkColumnX = chunkColumnX;
+            ChunkColumnZ = chunkColumnZ;
+
+            for (var y = 0; y < _chunks.Length; y++)
             {
-                Sections[i] = new Chunk();
+                _chunks[y] = new Chunk(_world, chunkColumnX, chunkColumnZ, -ChunksNegativeInColumn + y);
             }
         }
 
-        public static int GetChunkSectionArrayIndex(int chunkSectionY)
+        public static int GetChunksArrayIndex(int chunkY)
         {
-            return ChunksNegativeInColumn + chunkSectionY;
+            if (!IsValidChunkPos(chunkY)) { throw new ArgumentOutOfRangeException(); }
+
+            return ChunksNegativeInColumn + chunkY;
         }
 
-        public Chunk GetChunkSection(int chunkSectionY)
+        public Chunk? GetChunk(int chunkY)
         {
-            return Sections[GetChunkSectionArrayIndex(chunkSectionY)];
+            if (!IsValidChunkPos(chunkY)) { return null; }
+
+            return _chunks[GetChunksArrayIndex(chunkY)];
+        }
+
+        public static bool IsValidChunkPos(int y)
+        {
+            var invalid = ChunksNegativeInColumn + y < 0 || y >= ChunksPositiveInColumn;
+
+            return !invalid;
         }
     }
 }

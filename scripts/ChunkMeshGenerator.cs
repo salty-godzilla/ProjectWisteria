@@ -9,7 +9,7 @@ using Array = Godot.Collections.Array;
 
 namespace ProjectWisteria
 {
-    public class ChunkSectionMeshGenerator
+    public class ChunkMeshGenerator
     {
         private readonly int[] _baseBlockTriangles =
         {
@@ -36,16 +36,16 @@ namespace ProjectWisteria
 
         private const string MaterialPath = "res://materials/block_array.tres";
 
-        public ChunkSectionMeshGenerator()
+        public ChunkMeshGenerator()
         {
             _material = (ResourceLoader.Load(MaterialPath) as ShaderMaterial)!;
 
             _material.SetShaderParam("texture_albedo", BlockDictionary.Instance.TextureArray);
         }
 
-        public void Generate(out ArrayMesh? mesh, Chunk section)
+        public void Generate(out ArrayMesh? mesh, Chunk chunk)
         {
-            if (section.IsOnlyAir())
+            if (chunk.IsOnlyAir())
             {
                 mesh = null;
                 return;
@@ -55,7 +55,6 @@ namespace ProjectWisteria
                 BitArray[]? blockExistsYnZAxisLines = null;
                 BitArray[]? blockExistsY0ZAxisLines = null;
                 BitArray[]? blockExistsYpZAxisLines = null;
-
 
                 // Create X and Y faces
                 for (var blockY = 0; blockY < ChunkSize; blockY++)
@@ -67,7 +66,7 @@ namespace ProjectWisteria
 
                         for (var x = 0; x < ChunkSize + 2; x++)
                         {
-                            blockExistsYnZAxisLines[x] = GetZAxisLineBlockExists(x - 1, blockY - 1, section);
+                            blockExistsYnZAxisLines[x] = GetZAxisLineBlockExists(x - 1, blockY - 1, chunk);
                         }
                     }
 
@@ -78,7 +77,7 @@ namespace ProjectWisteria
 
                         for (var x = 0; x < ChunkSize + 2; x++)
                         {
-                            blockExistsY0ZAxisLines[x] = GetZAxisLineBlockExists(x - 1, blockY, section);
+                            blockExistsY0ZAxisLines[x] = GetZAxisLineBlockExists(x - 1, blockY, chunk);
                         }
                     }
 
@@ -86,12 +85,12 @@ namespace ProjectWisteria
 
                     for (var x = 0; x < ChunkSize + 2; x++)
                     {
-                        blockExistsYpZAxisLines[x] = GetZAxisLineBlockExists(x - 1, blockY + 1, section);
+                        blockExistsYpZAxisLines[x] = GetZAxisLineBlockExists(x - 1, blockY + 1, chunk);
                     }
 
                     for (var blockX = 0; blockX < ChunkSize; blockX++)
                     {
-                        CreateMergedFacesXy(section, blockX, blockY,
+                        CreateMergedFacesXy(chunk, blockX, blockY,
                             blockExistsYnZAxisLines, blockExistsY0ZAxisLines, blockExistsYpZAxisLines);
                     }
                 }
@@ -112,7 +111,7 @@ namespace ProjectWisteria
 
                         for (var z = 0; z < ChunkSize + 2; z++)
                         {
-                            blockExistsYnXAxisLines[z] = GetXAxisLineBlockExists(z - 1, blockY - 1, section);
+                            blockExistsYnXAxisLines[z] = GetXAxisLineBlockExists(z - 1, blockY - 1, chunk);
                         }
                     }
 
@@ -123,7 +122,7 @@ namespace ProjectWisteria
 
                         for (var z = 0; z < ChunkSize + 2; z++)
                         {
-                            blockExistsY0XAxisLines[z] = GetXAxisLineBlockExists(z - 1, blockY, section);
+                            blockExistsY0XAxisLines[z] = GetXAxisLineBlockExists(z - 1, blockY, chunk);
                         }
                     }
 
@@ -131,18 +130,21 @@ namespace ProjectWisteria
 
                     for (var z = 0; z < ChunkSize + 2; z++)
                     {
-                        blockExistsYpXAxisLines[z] = GetXAxisLineBlockExists(z - 1, blockY + 1, section);
+                        blockExistsYpXAxisLines[z] = GetXAxisLineBlockExists(z - 1, blockY + 1, chunk);
                     }
 
                     for (var blockZ = 0; blockZ < ChunkSize; blockZ++)
                     {
-                        CreateMergedFaceZ(section, blockY, blockZ,
+                        CreateMergedFaceZ(chunk, blockY, blockZ,
                             blockExistsYnXAxisLines, blockExistsY0XAxisLines, blockExistsYpXAxisLines);
                     }
                 }
             }
 
+
             mesh = new ArrayMesh();
+
+            if (_verts.Count == 0) { return; }
 
             var arrays = new Array();
             arrays.Resize((int) Mesh.ArrayType.Max);
@@ -166,7 +168,7 @@ namespace ProjectWisteria
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void CreateMergedFacesXy(Chunk section, int startX, int startY,
+        private void CreateMergedFacesXy(Chunk chunk, int startX, int startY,
             IReadOnlyList<BitArray> blockYnZAxisLines,
             IReadOnlyList<BitArray> blockY0ZAxisLines,
             IReadOnlyList<BitArray> blockYpZAxisLines)
@@ -183,19 +185,28 @@ namespace ProjectWisteria
             byte[] ypFaceStartAoLevels = null!;
             byte[] ynFaceStartAoLevels = null!;
 
+            var cx = chunk.ChunkColumnX;
+            var cy = chunk.ChunkY;
+            var cz = chunk.ChunkColumnZ;
+
+            var xpNeighborChunk = chunk.World.GetChunk(cx + 1, cy, cz);
+            var xnNeighborChunk = chunk.World.GetChunk(cx - 1, cy, cz);
+            var ypNeighborChunk = chunk.World.GetChunk(cx, cy + 1, cz);
+            var ynNeighborChunk = chunk.World.GetChunk(cx, cy - 1, cz);
+
             // Z-axis scanning
             for (var z = 0; z < ChunkSize; z++)
             {
-                var block = section.GetBlock(startX, startY, z);
+                var block = chunk.GetBlock(startX, startY, z);
 
                 if (startBlock == BlockType.Air && block == BlockType.Air) { continue; }
 
                 var blockChanged = block != startBlock;
 
-                var xpFaceVisible = IsXpFaceVisible(startX, startY, z, section);
-                var xnFaceVisible = IsXnFaceVisible(startX, startY, z, section);
-                var ypFaceVisible = IsYpFaceVisible(startX, startY, z, section);
-                var ynFaceVisible = IsYnFaceVisible(startX, startY, z, section);
+                var xpFaceVisible = IsXpFaceVisible(startX, startY, z, chunk, xpNeighborChunk);
+                var xnFaceVisible = IsXnFaceVisible(startX, startY, z, chunk, xnNeighborChunk);
+                var ypFaceVisible = IsYpFaceVisible(startX, startY, z, chunk, ypNeighborChunk);
+                var ynFaceVisible = IsYnFaceVisible(startX, startY, z, chunk, ynNeighborChunk);
 
                 var xpFaceRendered = false;
                 var xnFaceRendered = false;
@@ -399,7 +410,7 @@ namespace ProjectWisteria
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void CreateMergedFaceZ(Chunk section, int startY, int startZ,
+        private void CreateMergedFaceZ(Chunk chunk, int startY, int startZ,
             IReadOnlyList<BitArray> blockYnXAxisLines,
             IReadOnlyList<BitArray> blockY0XAxisLines,
             IReadOnlyList<BitArray> blockYpXAxisLines)
@@ -412,17 +423,24 @@ namespace ProjectWisteria
             byte[] zpFaceStartAoLevels = null!;
             byte[] znFaceStartAoLevels = null!;
 
+            var cx = chunk.ChunkColumnX;
+            var cy = chunk.ChunkY;
+            var cz = chunk.ChunkColumnZ;
+
+            var zpNeighborChunk = chunk.World.GetChunk(cx, cy, cz + 1);
+            var znNeighborChunk = chunk.World.GetChunk(cx, cy, cz - 1);
+
             // X-axis scanning
             for (var x = 0; x < ChunkSize; x++)
             {
-                var block = section.GetBlock(x, startY, startZ);
+                var block = chunk.GetBlock(x, startY, startZ);
 
                 if (startBlock == BlockType.Air && block == BlockType.Air) { continue; }
 
                 var blockChanged = block != startBlock;
 
-                var zpFaceVisible = IsZpFaceVisible(x, startY, startZ, section);
-                var znFaceVisible = IsZnFaceVisible(x, startY, startZ, section);
+                var zpFaceVisible = IsZpFaceVisible(x, startY, startZ, chunk, zpNeighborChunk);
+                var znFaceVisible = IsZnFaceVisible(x, startY, startZ, chunk, znNeighborChunk);
 
                 var zpFaceRendered = false;
                 var znFaceRendered = false;
@@ -530,81 +548,81 @@ namespace ProjectWisteria
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsXpFaceVisible(int x, int y, int z, Chunk section)
+        private static bool IsXpFaceVisible(int x, int y, int z, Chunk chunk, Chunk? neighborChunk)
         {
             if (x < ChunkSize - 1)
             {
-                return section.GetBlock(x + 1, y, z) == BlockType.Air;
+                return chunk.GetBlock(x + 1, y, z) == BlockType.Air;
             }
 
-            if (section.XpNeighbor == null) { return true; }
+            if (neighborChunk == null) { return false; }
 
-            return section.XpNeighbor.GetBlock(0, y, z) == BlockType.Air;
+            return neighborChunk.GetBlock(0, y, z) == BlockType.Air;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsXnFaceVisible(int x, int y, int z, Chunk section)
+        private static bool IsXnFaceVisible(int x, int y, int z, Chunk chunk, Chunk? neighborChunk)
         {
             if (x > 0)
             {
-                return section.GetBlock(x - 1, y, z) == BlockType.Air;
+                return chunk.GetBlock(x - 1, y, z) == BlockType.Air;
             }
 
-            if (section.XnNeighbor == null) { return true; }
+            if (neighborChunk == null) { return false; }
 
-            return section.XnNeighbor.GetBlock(ChunkSize - 1, y, z) == BlockType.Air;
+            return neighborChunk.GetBlock(ChunkSize - 1, y, z) == BlockType.Air;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsZpFaceVisible(int x, int y, int z, Chunk section)
+        private static bool IsZpFaceVisible(int x, int y, int z, Chunk chunk, Chunk? neighborChunk)
         {
             if (z < ChunkSize - 1)
             {
-                return section.GetBlock(x, y, z + 1) == BlockType.Air;
+                return chunk.GetBlock(x, y, z + 1) == BlockType.Air;
             }
 
-            if (section.ZpNeighbor == null) { return true; }
+            if (neighborChunk == null) { return false; }
 
-            return section.ZpNeighbor.GetBlock(x, y, 0) == BlockType.Air;
+            return neighborChunk.GetBlock(x, y, 0) == BlockType.Air;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsZnFaceVisible(int x, int y, int z, Chunk section)
+        private static bool IsZnFaceVisible(int x, int y, int z, Chunk chunk, Chunk? neighborChunk)
         {
             if (z > 0)
             {
-                return section.GetBlock(x, y, z - 1) == BlockType.Air;
+                return chunk.GetBlock(x, y, z - 1) == BlockType.Air;
             }
 
-            if (section.ZnNeighbor == null) { return true; }
+            if (neighborChunk == null) { return false; }
 
-            return section.ZnNeighbor.GetBlock(x, y, ChunkSize - 1) == BlockType.Air;
+            return neighborChunk.GetBlock(x, y, ChunkSize - 1) == BlockType.Air;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsYpFaceVisible(int x, int y, int z, Chunk section)
+        private static bool IsYpFaceVisible(int x, int y, int z, Chunk chunk, Chunk? neighborChunk)
         {
             if (y < ChunkSize - 1)
             {
-                return section.GetBlock(x, y + 1, z) == BlockType.Air;
+                return chunk.GetBlock(x, y + 1, z) == BlockType.Air;
             }
 
-            if (section.YpNeighbor == null) { return true; }
+            if (neighborChunk == null) { return false; }
 
-            return section.YpNeighbor.GetBlock(x, 0, z) == BlockType.Air;
+            return neighborChunk.GetBlock(x, 0, z) == BlockType.Air;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsYnFaceVisible(int x, int y, int z, Chunk section)
+        private static bool IsYnFaceVisible(int x, int y, int z, Chunk chunk, Chunk? neighborChunk)
         {
             if (y > 0)
             {
-                return section.GetBlock(x, y - 1, z) == BlockType.Air;
+                return chunk.GetBlock(x, y - 1, z) == BlockType.Air;
             }
 
-            if (section.YnNeighbor == null) { return true; }
+            if (neighborChunk == null) { return false; }
 
-            return section.YnNeighbor.GetBlock(x, ChunkSize - 1, z) == BlockType.Air;
+            return neighborChunk.GetBlock(x, ChunkSize - 1, z) == BlockType.Air;
         }
 
         private void AddXpBlockFaceElems(int x, int y, int z, int len, BlockType block, IReadOnlyList<byte> aoLevels)
@@ -847,29 +865,127 @@ namespace ProjectWisteria
             }
         }
 
-        public static BitArray GetZAxisLineBlockExists(int blockX, int blockY, Chunk section)
+        public static BitArray GetZAxisLineBlockExists(int blockX, int blockY, Chunk chunk)
         {
             var results = new BitArray(ChunkSize + 2, false);
 
-            if (!Chunk.IsValidBlockPos(blockX, blockY, 0)) { return results; }
+            var cxOffset = 0;
+            var cyOffset = 0;
 
-            for (var z = 0; z < ChunkSize; z++)
+            var bx = blockX;
+            var by = blockY;
+
+            switch (blockX)
             {
-                results[z + 1] = section.GetBlock(blockX, blockY, z) != BlockType.Air;
+                case -1:
+                    cxOffset = -1;
+                    bx = ChunkSize - 1;
+                    break;
+                case ChunkSize:
+                    cxOffset = 1;
+                    bx = 0;
+                    break;
+            }
+
+            switch (blockY)
+            {
+                case -1:
+                    cyOffset = -1;
+                    by = ChunkSize - 1;
+                    break;
+                case ChunkSize:
+                    cyOffset = 1;
+                    by = 0;
+                    break;
+            }
+
+            var cx = chunk.ChunkColumnX;
+            var cy = chunk.ChunkY;
+            var cz = chunk.ChunkColumnZ;
+
+            var chunkA = chunk.World.GetChunk(cx + cxOffset, cy + cyOffset, cz - 1);
+            var chunkB = chunk.World.GetChunk(cx + cxOffset, cy + cyOffset, cz);
+            var chunkC = chunk.World.GetChunk(cx + cxOffset, cy + cyOffset, cz + 1);
+
+            if (chunkA != null)
+            {
+                results[0] = chunkA.GetBlock(bx, by, ChunkSize - 1) != BlockType.Air;
+            }
+
+            if (chunkC != null)
+            {
+                results[ChunkSize + 1] = chunkC.GetBlock(bx, by, 0) != BlockType.Air;
+            }
+
+            if (chunkB != null)
+            {
+                for (var z = 0; z < ChunkSize; z++)
+                {
+                    results[z + 1] = chunkB.GetBlock(bx, by, z) != BlockType.Air;
+                }
             }
 
             return results;
         }
 
-        public static BitArray GetXAxisLineBlockExists(int blockZ, int blockY, Chunk section)
+        public static BitArray GetXAxisLineBlockExists(int blockZ, int blockY, Chunk chunk)
         {
             var results = new BitArray(ChunkSize + 2, false);
 
-            if (!Chunk.IsValidBlockPos(0, blockY, blockZ)) { return results; }
+            var czOffset = 0;
+            var cyOffset = 0;
 
-            for (var x = 0; x < ChunkSize; x++)
+            var bz = blockZ;
+            var by = blockY;
+
+            switch (blockZ)
             {
-                results[x + 1] = section.GetBlock(x, blockY, blockZ) != BlockType.Air;
+                case -1:
+                    czOffset = -1;
+                    bz = ChunkSize - 1;
+                    break;
+                case ChunkSize:
+                    czOffset = 1;
+                    bz = 0;
+                    break;
+            }
+
+            switch (blockY)
+            {
+                case -1:
+                    cyOffset = -1;
+                    by = ChunkSize - 1;
+                    break;
+                case ChunkSize:
+                    cyOffset = 1;
+                    by = 0;
+                    break;
+            }
+
+            var cx = chunk.ChunkColumnX;
+            var cy = chunk.ChunkY;
+            var cz = chunk.ChunkColumnZ;
+
+            var chunkA = chunk.World.GetChunk(cx - 1, cy + cyOffset, cz + czOffset);
+            var chunkB = chunk.World.GetChunk(cx, cy + cyOffset, cz + czOffset);
+            var chunkC = chunk.World.GetChunk(cx + 1, cy + cyOffset, cz + czOffset);
+
+            if (chunkA != null)
+            {
+                results[0] = chunkA.GetBlock(ChunkSize - 1, by, bz) != BlockType.Air;
+            }
+
+            if (chunkC != null)
+            {
+                results[ChunkSize + 1] = chunkC.GetBlock(0, by, bz) != BlockType.Air;
+            }
+
+            if (chunkB != null)
+            {
+                for (var x = 0; x < ChunkSize; x++)
+                {
+                    results[x + 1] = chunkB.GetBlock(x, by, bz) != BlockType.Air;
+                }
             }
 
             return results;
