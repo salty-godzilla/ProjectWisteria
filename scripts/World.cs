@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Godot;
 using ProjectWisteria.Coord;
 using static ProjectWisteria.WorldConstants;
@@ -68,17 +69,43 @@ namespace ProjectWisteria
 
         public override void _Process(float delta)
         {
-            if (_needRenderUpdateChunks.Count > 0)
+            UpdateMultipleChunkRender(10);
+        }
+
+        public void UpdateChunkRender()
+        {
+            if (_needRenderUpdateChunks.Count == 0) { return; }
+
+            var globalCoord = _needRenderUpdateChunks.Dequeue();
+
+            var chunkCoord = new ChunkColumnCoord(globalCoord.X, globalCoord.Z);
+
+            var chunkCol = _chunkCols[chunkCoord];
+            var chunk = chunkCol.GetChunk(globalCoord.Y)!;
+
+            _chunkMeshGenerator.Generate(out var mesh, chunk);
+
+            ((MeshInstance) _chunkNodes[globalCoord].GetChild(0)).Mesh = mesh;
+        }
+
+        public void UpdateMultipleChunkRender(int timeLimitMillisec)
+        {
+            if (_needRenderUpdateChunks.Count == 0) { return; }
+
+            var stopwatch = new Stopwatch();
+
+            while (_needRenderUpdateChunks.Count > 0)
             {
-                var globalCoord = _needRenderUpdateChunks.Dequeue();
-                var chunkCoord = new ChunkColumnCoord(globalCoord.X, globalCoord.Z);
+                stopwatch.Start();
 
-                var chunkCol = _chunkCols[chunkCoord];
-                var chunk = chunkCol.GetChunk(globalCoord.Y)!;
+                UpdateChunkRender();
 
-                _chunkMeshGenerator.Generate(out var mesh, chunk);
+                stopwatch.Stop();
 
-                ((MeshInstance) _chunkNodes[globalCoord].GetChild(0)).Mesh = mesh;
+                if (stopwatch.Elapsed.TotalMilliseconds >= timeLimitMillisec)
+                {
+                    return;
+                }
             }
         }
 

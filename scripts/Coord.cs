@@ -12,6 +12,16 @@
                 X = x;
                 Z = z;
             }
+
+            public override int GetHashCode()
+            {
+                return (X, Z).GetHashCode();
+            }
+
+            public override bool Equals(object obj)
+            {
+                return obj is ChunkColumnCoord a && a.X == X && a.Z == Z;
+            }
         }
 
         public struct ChunkCoord
@@ -21,6 +31,16 @@
             public ChunkCoord(int y)
             {
                 Y = y;
+            }
+
+            public override int GetHashCode()
+            {
+                return Y;
+            }
+
+            public override bool Equals(object obj)
+            {
+                return obj is ChunkCoord a && a.Y == Y;
             }
         }
 
@@ -35,6 +55,16 @@
                 X = x;
                 Y = y;
                 Z = z;
+            }
+
+            public override int GetHashCode()
+            {
+                return (X, Y, Z).GetHashCode();
+            }
+
+            public override bool Equals(object obj)
+            {
+                return obj is ChunkGlobalCoord a && a.X == X && a.Y == Y && a.Z == Z;
             }
         }
     }
