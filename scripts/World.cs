@@ -14,7 +14,7 @@ namespace ProjectWisteria
         private readonly Dictionary<ChunkColumnCoord, ChunkColumn> _chunkCols = new();
         private readonly Dictionary<ChunkGlobalCoord, Node> _chunkNodes = new();
 
-        private readonly Queue<ChunkGlobalCoord> _needRenderUpdateChunks = new();
+        private readonly Queue<ChunkGlobalCoord> _renderUpdateChunkQueue = new();
 
         private TerrainGenerator _terrainGenerator = null!;
         private ChunkMeshGenerator _chunkMeshGenerator = null!;
@@ -58,7 +58,6 @@ namespace ProjectWisteria
                         chunkNode.AddChild(chunkMeshNode);
 
                         _chunkNodes[chunkGlobalCoord] = chunkNode;
-                        _needRenderUpdateChunks.Enqueue(chunkGlobalCoord);
                     }
 
                     var chunkCoord = new ChunkColumnCoord(chunkColX, chunkColZ);
@@ -74,9 +73,9 @@ namespace ProjectWisteria
 
         public void UpdateChunkRender()
         {
-            if (_needRenderUpdateChunks.Count == 0) { return; }
+            if (_renderUpdateChunkQueue.Count == 0) { return; }
 
-            var globalCoord = _needRenderUpdateChunks.Dequeue();
+            var globalCoord = _renderUpdateChunkQueue.Dequeue();
 
             var chunkCoord = new ChunkColumnCoord(globalCoord.X, globalCoord.Z);
 
@@ -86,15 +85,17 @@ namespace ProjectWisteria
             _chunkMeshGenerator.Generate(out var mesh, chunk);
 
             ((MeshInstance) _chunkNodes[globalCoord].GetChild(0)).Mesh = mesh;
+
+            chunk.IsRenderScheduled = false;
         }
 
         public void UpdateMultipleChunkRender(int timeLimitMillisec)
         {
-            if (_needRenderUpdateChunks.Count == 0) { return; }
+            if (_renderUpdateChunkQueue.Count == 0) { return; }
 
             var stopwatch = new Stopwatch();
 
-            while (_needRenderUpdateChunks.Count > 0)
+            while (_renderUpdateChunkQueue.Count > 0)
             {
                 stopwatch.Start();
 
@@ -123,21 +124,61 @@ namespace ProjectWisteria
             return chunkCol?.GetChunk(y);
         }
 
+        public Chunk? GetChunk(ChunkGlobalCoord coord)
+        {
+            var chunkCol = GetChunkColumn(coord.X, coord.Z);
+
+            return chunkCol?.GetChunk(coord.Y);
+        }
+
+
         public BlockType GetBlock(int x, int y, int z)
         {
-            var chunkColX = x >> 4;
-            var chunkColZ = z >> 4;
-
-            var chunkY = y >> 4;
-
-            var blockX = x & 0b1111;
-            var blockY = y & 0b1111;
-            var blockZ = z & 0b1111;
+            GetChunkColumnCoordFromGlobalBlockCoord(x, y, z, out var chunkColX, out var chunkColZ);
+            GetLocalBlockCoordFromGlobalBlockCoord(x, y, z, out var blockX, out var blockY, out var blockZ);
+            GetChunkCoordFromGlobalBlockCoord(x, y, z, out var chunkY);
 
             var chunk = GetChunkColumn(chunkColX, chunkColZ)!.GetChunk(chunkY);
 
             var block = chunk.GetBlock(blockX, blockY, blockZ)!;
             return block;
+        }
+
+        public void SetBlock(int x, int y, int z, BlockType blockType)
+        {
+            GetChunkColumnCoordFromGlobalBlockCoord(x, y, z, out var chunkColX, out var chunkColZ);
+            GetLocalBlockCoordFromGlobalBlockCoord(x, y, z, out var blockX, out var blockY, out var blockZ);
+            GetChunkCoordFromGlobalBlockCoord(x, y, z, out var chunkY);
+
+            var chunk = GetChunkColumn(chunkColX, chunkColZ)!.GetChunk(chunkY);
+
+            chunk.SetBlock(blockX, blockY, blockZ, blockType);
+        }
+
+        public void ScheduleUpdateChunk(Chunk chunk)
+        {
+            var coord = new ChunkGlobalCoord(chunk.ChunkColumnX, chunk.ChunkY, chunk.ChunkColumnZ);
+
+            _renderUpdateChunkQueue.Enqueue(coord);
+        }
+
+        public static void GetChunkColumnCoordFromGlobalBlockCoord(int x, int y, int z, out int colX, out int colZ)
+        {
+            colX = x >> 4;
+            colZ = z >> 4;
+        }
+
+        public static void GetChunkCoordFromGlobalBlockCoord(int x, int y, int z, out int chunkY)
+        {
+            chunkY = y >> 4;
+        }
+
+        public static void GetLocalBlockCoordFromGlobalBlockCoord(int x, int y, int z,
+            out int bx, out int by, out int bz)
+        {
+            bx = x & 0b1111;
+            by = y & 0b1111;
+            bz = z & 0b1111;
         }
 
         public List<AABB> GetAabb(AABB colliderAabb)

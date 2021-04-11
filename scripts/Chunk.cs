@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
+using ProjectWisteria.Coord;
 using static ProjectWisteria.WorldConstants;
 
 namespace ProjectWisteria
@@ -15,6 +16,8 @@ namespace ProjectWisteria
         private readonly BlockType[] _blocks = new BlockType[ChunkSizeCubed];
 
         public int BlockCount { get; private set; }
+
+        public bool IsRenderScheduled { get; set; }
 
         public Chunk(World world, int chunkColumnX, int chunkColumnZ, int chunkY)
         {
@@ -51,6 +54,55 @@ namespace ProjectWisteria
             {
                 BlockCount--;
             }
+
+            PendingRender();
+
+            var chunkEdgeX = x switch
+            {
+                0 => -1,
+                ChunkSize - 1 => 1,
+                _ => 0
+            };
+
+            var chunkEdgeY = y switch
+            {
+                0 => -1,
+                ChunkSize - 1 => 1,
+                _ => 0
+            };
+
+
+            var chunkEdgeZ = z switch
+            {
+                0 => -1,
+                ChunkSize - 1 => 1,
+                _ => 0
+            };
+
+            var coord = new ChunkGlobalCoord(ChunkColumnX, ChunkY, ChunkColumnZ);
+
+            var neighbor1 = new ChunkGlobalCoord(ChunkColumnX + chunkEdgeX, ChunkY, ChunkColumnZ);
+            var neighbor2 = new ChunkGlobalCoord(ChunkColumnX, ChunkY + chunkEdgeY, ChunkColumnZ);
+            var neighbor3 = new ChunkGlobalCoord(ChunkColumnX, ChunkY, ChunkColumnZ + chunkEdgeZ);
+            var neighbor4 = new ChunkGlobalCoord(ChunkColumnX + chunkEdgeX, ChunkY + chunkEdgeY, ChunkColumnZ);
+            var neighbor5 = new ChunkGlobalCoord(ChunkColumnX + chunkEdgeX, ChunkY, ChunkColumnZ + chunkEdgeZ);
+            var neighbor6 = new ChunkGlobalCoord(ChunkColumnX, ChunkY + chunkEdgeY, ChunkColumnZ + chunkEdgeZ);
+            var neighbor7 =
+                new ChunkGlobalCoord(ChunkColumnX + chunkEdgeX, ChunkY + chunkEdgeY, ChunkColumnZ + chunkEdgeZ);
+
+            if (!neighbor1.Equals(coord)) { World.GetChunk(neighbor1)?.PendingRender(); }
+
+            if (!neighbor2.Equals(coord)) { World.GetChunk(neighbor2)?.PendingRender(); }
+
+            if (!neighbor3.Equals(coord)) { World.GetChunk(neighbor3)?.PendingRender(); }
+
+            if (!neighbor4.Equals(coord)) { World.GetChunk(neighbor4)?.PendingRender(); }
+
+            if (!neighbor5.Equals(coord)) { World.GetChunk(neighbor5)?.PendingRender(); }
+
+            if (!neighbor6.Equals(coord)) { World.GetChunk(neighbor6)?.PendingRender(); }
+
+            if (!neighbor7.Equals(coord)) { World.GetChunk(neighbor7)?.PendingRender(); }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -71,6 +123,7 @@ namespace ProjectWisteria
             return BlockCount == 0;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsValidBlockPos(int x, int y, int z)
         {
             var invalid = x < 0 || x >= ChunkSize
@@ -78,6 +131,16 @@ namespace ProjectWisteria
                                 || z < 0 || z >= ChunkSize;
 
             return !invalid;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void PendingRender()
+        {
+            if (IsRenderScheduled) { return; }
+
+            IsRenderScheduled = true;
+
+            World.ScheduleUpdateChunk(this);
         }
     }
 }
