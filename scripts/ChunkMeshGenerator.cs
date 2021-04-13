@@ -258,21 +258,15 @@ namespace ProjectWisteria
                     if (xpFaceStartZ != -1)
                     {
                         var needRender = false;
-                        var differentAoLevels = false;
-                        byte[] aoLevels = null!;
+                        var aoLevels =
+                            GetXpFaceAmbientOcclusionLevels(z,
+                                blockYnZAxisLines[startX + 2],
+                                blockY0ZAxisLines[startX + 2],
+                                blockYpZAxisLines[startX + 2]);
 
-                        if (blockChanged || !xpFaceVisible) { needRender = true; }
-                        else
-                        {
-                            aoLevels =
-                                GetXpFaceAmbientOcclusionLevels(z,
-                                    blockYnZAxisLines[startX + 2],
-                                    blockY0ZAxisLines[startX + 2],
-                                    blockYpZAxisLines[startX + 2]);
+                        var differentAoLevels = !xpFaceStartAoLevels.SequenceEqual(aoLevels);
 
-                            differentAoLevels = !xpFaceStartAoLevels.SequenceEqual(aoLevels);
-                            if (differentAoLevels) { needRender = true; }
-                        }
+                        if (blockChanged || !xpFaceVisible || differentAoLevels) { needRender = true; }
 
                         if (needRender)
                         {
@@ -287,21 +281,15 @@ namespace ProjectWisteria
                     if (xnFaceStartZ != -1)
                     {
                         var needRender = false;
-                        var differentAoLevels = false;
-                        byte[] aoLevels = null!;
+                        var aoLevels =
+                            GetXnFaceAmbientOcclusionLevels(z,
+                                blockYnZAxisLines[startX],
+                                blockY0ZAxisLines[startX],
+                                blockYpZAxisLines[startX]);
 
-                        if (blockChanged || !xnFaceVisible) { needRender = true; }
-                        else
-                        {
-                            aoLevels =
-                                GetXnFaceAmbientOcclusionLevels(z,
-                                    blockYnZAxisLines[startX],
-                                    blockY0ZAxisLines[startX],
-                                    blockYpZAxisLines[startX]);
+                        var differentAoLevels = !xnFaceStartAoLevels.SequenceEqual(aoLevels);
 
-                            differentAoLevels = !xnFaceStartAoLevels.SequenceEqual(aoLevels);
-                            if (differentAoLevels) { needRender = true; }
-                        }
+                        if (blockChanged || !xnFaceVisible || differentAoLevels) { needRender = true; }
 
                         if (needRender)
                         {
@@ -316,21 +304,15 @@ namespace ProjectWisteria
                     if (ypFaceStartZ != -1)
                     {
                         var needRender = false;
-                        var differentAoLevels = false;
-                        byte[] aoLevels = null!;
+                        var aoLevels =
+                            GetYpFaceAmbientOcclusionLevels(z,
+                                blockYpZAxisLines[startX],
+                                blockYpZAxisLines[startX + 1],
+                                blockYpZAxisLines[startX + 2]);
 
-                        if (blockChanged || !ypFaceVisible) { needRender = true; }
-                        else
-                        {
-                            aoLevels =
-                                GetYpFaceAmbientOcclusionLevels(z,
-                                    blockYpZAxisLines[startX],
-                                    blockYpZAxisLines[startX + 1],
-                                    blockYpZAxisLines[startX + 2]);
+                        var differentAoLevels = !ypFaceStartAoLevels.SequenceEqual(aoLevels);
 
-                            differentAoLevels = !ypFaceStartAoLevels.SequenceEqual(aoLevels);
-                            if (differentAoLevels) { needRender = true; }
-                        }
+                        if (blockChanged || !ypFaceVisible || differentAoLevels) { needRender = true; }
 
                         if (needRender)
                         {
@@ -345,21 +327,15 @@ namespace ProjectWisteria
                     if (ynFaceStartZ != -1)
                     {
                         var needRender = false;
-                        var differentAoLevels = false;
-                        byte[] aoLevels = null!;
+                        var aoLevels =
+                            GetYnFaceAmbientOcclusionLevels(z,
+                                blockYnZAxisLines[startX],
+                                blockYnZAxisLines[startX + 1],
+                                blockYnZAxisLines[startX + 2]);
 
-                        if (blockChanged || !ynFaceVisible) { needRender = true; }
-                        else
-                        {
-                            aoLevels =
-                                GetYnFaceAmbientOcclusionLevels(z,
-                                    blockYnZAxisLines[startX],
-                                    blockYnZAxisLines[startX + 1],
-                                    blockYnZAxisLines[startX + 2]);
+                        var differentAoLevels = !ynFaceStartAoLevels.SequenceEqual(aoLevels);
 
-                            differentAoLevels = !ynFaceStartAoLevels.SequenceEqual(aoLevels);
-                            if (differentAoLevels) { needRender = true; }
-                        }
+                        if (blockChanged || !ynFaceVisible || differentAoLevels) { needRender = true; }
 
                         if (needRender)
                         {
@@ -470,22 +446,15 @@ namespace ProjectWisteria
                     if (zpFaceStartX != -1)
                     {
                         var needRender = false;
-                        var differentAoLevels = false;
-                        byte[] aoLevels = null!;
+                        var aoLevels =
+                            GetZpFaceAmbientOcclusionLevels(x,
+                                blockYnXAxisLines[startZ + 2],
+                                blockY0XAxisLines[startZ + 2],
+                                blockYpXAxisLines[startZ + 2]);
 
-                        if (blockChanged || !zpFaceVisible) { needRender = true; }
-                        else
-                        {
-                            aoLevels =
-                                GetZpFaceAmbientOcclusionLevels(x,
-                                    blockYnXAxisLines[startZ + 2],
-                                    blockY0XAxisLines[startZ + 2],
-                                    blockYpXAxisLines[startZ + 2]);
+                        var differentAoLevels = !zpFaceStartAoLevels.SequenceEqual(aoLevels);
 
-                            differentAoLevels = !zpFaceStartAoLevels.SequenceEqual(aoLevels);
-                            if (differentAoLevels) { needRender = true; }
-                        }
-
+                        if (blockChanged || !zpFaceVisible || differentAoLevels) { needRender = true; }
 
                         if (needRender)
                         {
@@ -500,21 +469,15 @@ namespace ProjectWisteria
                     if (znFaceStartX != -1)
                     {
                         var needRender = false;
-                        var differentAoLevels = false;
-                        byte[] aoLevels = null!;
+                        var aoLevels =
+                            GetZnFaceAmbientOcclusionLevels(x,
+                                blockYnXAxisLines[startZ],
+                                blockY0XAxisLines[startZ],
+                                blockYpXAxisLines[startZ]);
 
-                        if (blockChanged || !znFaceVisible) { needRender = true; }
-                        else
-                        {
-                            aoLevels =
-                                GetZnFaceAmbientOcclusionLevels(x,
-                                    blockYnXAxisLines[startZ],
-                                    blockY0XAxisLines[startZ],
-                                    blockYpXAxisLines[startZ]);
+                        var differentAoLevels = !znFaceStartAoLevels.SequenceEqual(aoLevels);
 
-                            differentAoLevels = !znFaceStartAoLevels.SequenceEqual(aoLevels);
-                            if (differentAoLevels) { needRender = true; }
-                        }
+                        if (blockChanged || !znFaceVisible || differentAoLevels) { needRender = true; }
 
                         if (needRender)
                         {
