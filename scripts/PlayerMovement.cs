@@ -27,7 +27,6 @@ namespace ProjectWisteria
         public override void _Ready()
         {
             _camera = GetNode<Camera>("./Camera");
-            _camera.Current = true;
 
             _entityCollision = GetNode<EntityCollision>("./CollisionDetecter");
 
